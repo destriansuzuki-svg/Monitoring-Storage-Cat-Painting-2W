@@ -58,47 +58,80 @@ function renderInventoryTable(data) {
         </div>
     `;
 
-    renderRows(data);
-    if(typeof lucide !== 'undefined') lucide.createIcons();
-}
+   /**
+ * REVISI: Menampilkan Semua Kolom Sesuai Database Spreadsheet
+ * Kolom: NO, TGL, SJ, PART, PRODUK, SUPPLIER, LOT, EXP, REV EXP, VOL, QTY(K), QTY(L), LOKASI, STATUS, KET
+ */
 
-// Fungsi Internal Render Row
 function renderRows(data) {
     const tbody = document.getElementById('inventoryBody');
     const cardContainer = document.getElementById('inventoryCards');
     
     if (data.length === 0) {
-        const msg = `<tr><td colspan="10" class="p-10 text-center text-slate-400 italic text-xs">Data tidak ditemukan.</td></tr>`;
-        tbody.innerHTML = msg;
-        cardContainer.innerHTML = `<p class="p-10 text-center text-slate-400 text-xs">Data tidak ditemukan.</p>`;
+        tbody.innerHTML = `<tr><td colspan="15" class="p-10 text-center text-slate-400 italic text-xs">Data tidak ditemukan.</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = data.map((item, index) => `
-        <tr class="hover:bg-slate-50 transition-colors">
-            <td class="p-2 border-r text-center">${index + 1}</td>
-            <td class="p-2 border-r whitespace-nowrap">${item.tgl}</td>
-            <td class="p-2 border-r font-mono text-[9px]">${item.sj}</td>
-            <td class="p-2 border-r font-bold">${item.partNo}</td>
-            <td class="p-2 border-r text-[9px] max-w-[150px] truncate">${item.produk}</td>
-            <td class="p-2 border-r font-mono">${item.lot}</td>
-            <td class="p-2 border-r text-red-600 font-bold">${item.exp}</td>
-            <td class="p-2 border-r text-center font-black">${item.qtyLiter}</td>
+    // Render Tabel (Desktop) - Menampilkan Semua 15 Kolom
+    tbody.innerHTML = data.map((item, index) => {
+        // Logika warna status
+        const statusClass = item.status === 'IN' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+        
+        return `
+        <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+            <td class="p-2 border-r text-center font-medium">${index + 1}</td>
+            <td class="p-2 border-r whitespace-nowrap">${item.tgl || '-'}</td>
+            <td class="p-2 border-r font-mono text-[9px]">${item.sj || '-'}</td>
+            <td class="p-2 border-r font-bold text-blue-600">${item.partNo || item.partNumber || '-'}</td>
+            <td class="p-2 border-r text-[9px] min-w-[120px]">${item.produk || item.namaProduk || '-'}</td>
+            <td class="p-2 border-r text-[9px]">${item.supplier || '-'}</td>
+            <td class="p-2 border-r font-mono">${item.lot || '-'}</td>
+            <td class="p-2 border-r text-red-600 font-medium">${item.exp || '-'}</td>
+            <td class="p-2 border-r text-orange-600 font-medium">${item.revExp || '-'}</td>
+            <td class="p-2 border-r text-center font-bold">${item.volLiter || item.vol || '0'}</td>
+            <td class="p-2 border-r text-center font-bold text-slate-800">${item.qtyKaleng || '0'}</td>
+            <td class="p-2 border-r text-center font-black text-blue-700">${item.qtyLiter || '0'}</td>
+            <td class="p-2 border-r text-[9px] font-bold uppercase">${item.lokasi || '-'}</td>
             <td class="p-2 border-r text-center">
-                <span class="px-1.5 py-0.5 rounded text-[8px] font-black ${item.status === 'IN' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${item.status}</span>
+                <span class="px-2 py-0.5 rounded-full text-[8px] font-black ${statusClass}">${item.status || 'OUT'}</span>
             </td>
+            <td class="p-2 border-r text-[9px] italic text-slate-400">${item.ket || item.keterangan || '-'}</td>
             <td class="p-2 text-center">
                 <div class="flex justify-center gap-1">
-                    <button onclick="handleEditTransaction('${item.sj}', '${item.partNo}')" class="p-1 bg-amber-50 text-amber-600 rounded hover:bg-amber-100">
-                        <i data-lucide="edit-3" class="w-3 h-3"></i>
+                    <button onclick="handleEditTransaction('${item.sj}', '${item.partNo || item.partNumber}')" class="p-1.5 bg-amber-50 text-amber-600 rounded shadow-sm hover:bg-amber-100">
+                        <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
                     </button>
-                    <button onclick="handleDeleteTransaction('${item.sj}', '${item.partNo}')" class="p-1 bg-red-50 text-red-600 rounded hover:bg-red-100">
-                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    <button onclick="handleDeleteTransaction('${item.sj}', '${item.partNo || item.partNumber}')" class="p-1.5 bg-red-50 text-red-600 rounded shadow-sm hover:bg-red-100">
+                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                     </button>
                 </div>
             </td>
+        </tr>`;
+    }).join('');
+
+    // Update Header agar muat banyak kolom (Horizontal Scroll aktif)
+    const tableHeader = document.querySelector('thead');
+    tableHeader.innerHTML = `
+        <tr class="bg-slate-100 text-slate-700 font-bold uppercase border-b border-slate-200">
+            <th class="p-2 border-r text-center">NO</th>
+            <th class="p-2 border-r">TGL</th>
+            <th class="p-2 border-r">SURAT JALAN</th>
+            <th class="p-2 border-r">PART NO</th>
+            <th class="p-2 border-r">PRODUK</th>
+            <th class="p-2 border-r">SUPPLIER</th>
+            <th class="p-2 border-r">LOT</th>
+            <th class="p-2 border-r">EXP</th>
+            <th class="p-2 border-r">REV.EXP</th>
+            <th class="p-2 border-r">VOL</th>
+            <th class="p-2 border-r">QTY(K)</th>
+            <th class="p-2 border-r">QTY(L)</th>
+            <th class="p-2 border-r">LOKASI</th>
+            <th class="p-2 border-r text-center">STATUS</th>
+            <th class="p-2 border-r">KET</th>
+            <th class="p-2 text-center">AKSI</th>
         </tr>
-    `).join('');
+    `;
+}
     
     // Mobile card logic sama (disingkat untuk efisiensi koding)
 }
@@ -191,18 +224,33 @@ function handleEditTransaction(noSJ, partNo) {
  * FUNGSI EXPORT EXCEL (Simple CSV Version)
  */
 function exportToExcel() {
-    let csv = "No,Tanggal,Surat Jalan,Part Number,Produk,Supplier,Lot,Exp,Qty Liter,Status\n";
+    // Header CSV lengkap sesuai Spreadsheet
+    let csv = "No,Tanggal,Surat Jalan,Part Number,Nama Produk,Supplier,No Lot,Expired,Rev Expired,Volume,Qty Kaleng,Qty Liter,Lokasi,Status,Keterangan\n";
+    
     currentInventoryData.forEach((item, index) => {
-        csv += `${index + 1},${item.tgl},${item.sj},${item.partNo},"${item.produk}",${item.supplier},${item.lot},${item.exp},${item.qtyLiter},${item.status}\n`;
+        const row = [
+            index + 1,
+            item.tgl,
+            item.sj,
+            item.partNo || item.partNumber,
+            `"${item.produk || item.namaProduk}"`, // Gunakan kutip jika ada koma di nama produk
+            item.supplier,
+            item.lot,
+            item.exp,
+            item.revExp,
+            item.volLiter,
+            item.qtyKaleng,
+            item.qtyLiter,
+            item.lokasi,
+            item.status,
+            `"${item.ket || item.keterangan || '-'}"`
+        ];
+        csv += row.join(",") + "\n";
     });
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
-    const url = URL.createObjectURL(blob);
-    link.setAttribute("href", url);
-    link.setAttribute("download", `Laporan_Inventory_${new Date().toLocaleDateString()}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
+    link.href = URL.createObjectURL(blob);
+    link.download = `Log_Inventory_Lengkap_${new Date().toISOString().split('T')[0]}.csv`;
     link.click();
-    document.body.removeChild(link);
 }
