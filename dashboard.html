@@ -6,6 +6,7 @@
     <title>Sistem Inventory Cat & Chemical</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; letter-spacing: -0.01em; }
@@ -41,29 +42,26 @@
             
             <nav class="flex-grow p-3 space-y-0.5 overflow-y-auto no-scrollbar">
                 <p class="px-3 py-2 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Menu Utama</p>
-                <button onclick="showSection('dashboard')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all bg-blue-600 text-white shadow-sm shadow-blue-900/20 active-link">
+                <button onclick="showSection('dashboard')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all bg-blue-600 text-white active-link">
                     <i data-lucide="pie-chart" class="w-4 h-4"></i>
                     <span>Dashboard</span>
                 </button>
-                
-                <button onclick="showSection('master')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all">
-                    <i data-lucide="database" class="w-4 h-4"></i>
-                    <span>Data Cat & Chemical</span>
-                </button>
-
-                <button onclick="showSection('inventory')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all">
+                <button onclick="showSection('inventory')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all text-slate-400">
                     <i data-lucide="list-checks" class="w-4 h-4"></i>
                     <span>Histori Transaksi</span>
                 </button>
-
-                <button onclick="showSection('stock')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all">
+                <button onclick="showSection('stock')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all text-slate-400">
                     <i data-lucide="box-select" class="w-4 h-4"></i>
-                    <span>Stock Barang</span>
+                    <span>Stock Material</span>
                 </button>
                 
                 <div id="adminMenu" class="pt-4 mt-2 border-t border-slate-800/50">
-                    <p class="px-3 py-2 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Admin Control</p>
-                    <button onclick="showSection('update')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all">
+                    <p class="px-3 py-2 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Master Data</p>
+                    <button onclick="showSection('master')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all text-slate-400">
+                        <i data-lucide="database" class="w-4 h-4"></i>
+                        <span>Database Cat & Chem</span>
+                    </button>
+                    <button onclick="showSection('update')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 hover:text-white transition-all text-slate-400">
                         <i data-lucide="file-plus" class="w-4 h-4"></i>
                         <span>Input In/Out</span>
                     </button>
@@ -76,7 +74,7 @@
                         <i data-lucide="user-check" class="w-4 h-4"></i>
                     </div>
                     <div class="truncate">
-                        <p id="userRoleDisplay" class="text-[11px] font-bold text-slate-200 truncate leading-tight">ADMIN GUDANG</p>
+                        <p id="userRoleDisplay" class="text-[11px] font-bold text-slate-200 truncate leading-tight uppercase">Admin Gudang</p>
                         <p class="text-[9px] text-green-400 font-bold flex items-center gap-1">
                             <span class="w-1 h-1 bg-green-500 rounded-full animate-pulse"></span> ONLINE
                         </p>
@@ -101,7 +99,7 @@
                         <h1 id="sectionTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Ringkasan Gudang</h1>
                     </div>
                     <div id="statusBadge" class="bg-white px-3 py-1.5 rounded border border-slate-200 shadow-sm text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
-                        SYNC STATUS: OK
+                        SYNC STATUS: <span class="text-emerald-500">OK</span>
                     </div>
                 </header>
 
@@ -116,7 +114,6 @@
                                 <h3 id="totalItem" class="text-2xl font-bold text-slate-800 leading-none tracking-tight">--</h3>
                             </div>
                         </div>
-
                         <div class="bg-white p-5 rounded border border-slate-200 shadow-sm flex items-center gap-4">
                             <div class="p-3 bg-amber-50 text-amber-600 rounded">
                                 <i data-lucide="flame-kindling" class="w-5 h-5"></i>
@@ -126,7 +123,6 @@
                                 <h3 id="lowStock" class="text-2xl font-bold text-slate-800 leading-none tracking-tight">--</h3>
                             </div>
                         </div>
-
                         <div class="bg-white p-5 rounded border border-slate-200 shadow-sm flex items-center gap-4">
                             <div class="p-3 bg-emerald-50 text-emerald-600 rounded">
                                 <i data-lucide="test-tube-diagonal" class="w-5 h-5"></i>
@@ -137,7 +133,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
                         <div class="bg-slate-50 p-4 border-b border-slate-200">
                             <h4 class="font-bold text-slate-700 text-[11px] uppercase tracking-widest flex items-center gap-2">
@@ -151,42 +146,43 @@
                     </div>
                 </section>
 
-                <section id="master-section" class="hidden animate-in fade-in">
-                    <div id="masterContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        </div>
-                </section>
-
                 <section id="inventory-section" class="hidden animate-in fade-in">
-                    <div id="inventoryContainer" class="space-y-4">
+                    <div id="inventoryContainer" class="bg-white border border-slate-200 rounded shadow-sm overflow-x-auto min-h-[400px]">
                         </div>
                 </section>
 
                 <section id="stock-section" class="hidden animate-in fade-in">
-                    <div id="stockContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                         </div>
+                    <div id="stockSummaryContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        </div>
+                </section>
+
+                <section id="master-section" class="hidden animate-in fade-in">
+                    <div class="flex flex-col md:flex-row gap-4 justify-between items-center mb-6">
+                        <div class="relative w-full md:w-96">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="searchMaster" placeholder="Cari nama produk atau part number..." class="w-full bg-white border border-slate-200 rounded-lg py-2 pl-10 pr-4 text-xs focus:ring-2 focus:ring-blue-500 outline-none">
+                        </div>
+                        <button onclick="openModalAdd()" class="w-full md:w-auto bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Material
+                        </button>
+                    </div>
+                    <div id="masterContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        </div>
                 </section>
 
                 <section id="update-section" class="hidden animate-in fade-in">
-                    <div class="max-w-xl mx-auto bg-white border border-slate-200 rounded shadow-md overflow-hidden">
-                        <div class="bg-slate-50 p-4 border-b border-slate-200 text-center">
-                            <h2 class="text-xs font-bold text-slate-800 uppercase tracking-widest">Input Data Transaksi</h2>
-                        </div>
-                        <div id="formPlaceholder" class="p-8 space-y-4">
-                             </div>
-                    </div>
+                    <div id="formPlaceholder" class="max-w-xl mx-auto"></div>
                 </section>
 
             </main>
         </div>
     </div>
 
-    <script src="inventory.js"></script>
-    <script src="stock.js"></script>
-    <script src="dashboard.js"></script> 
-
-    <script>
+    <script src="master.js"></script>    <script src="inventory.js"></script> <script src="stock.js"></script>     <script src="dashboard.js"></script> <script>
+        // Inisialisasi Lucide Icons
         lucide.createIcons();
 
+        // Variabel Sidebar
         const sidebar = document.getElementById('sidebar');
         const mobileBtn = document.getElementById('mobileMenuBtn');
         const closeBtn = document.getElementById('closeSidebar');
@@ -194,27 +190,32 @@
         mobileBtn.onclick = () => sidebar.classList.remove('-translate-x-full');
         closeBtn.onclick = () => sidebar.classList.add('-translate-x-full');
 
+        /**
+         * Navigasi Section (SPA) - Diperbarui untuk mendukung Master Data
+         */
         function showSection(id) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            
             const target = document.getElementById(id + '-section');
             if(target) target.classList.remove('hidden');
 
+            // Update UI Sidebar
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-sm', 'shadow-blue-900/20', 'active-link');
+                btn.classList.remove('bg-blue-600', 'text-white', 'shadow-sm', 'active-link');
                 btn.classList.add('text-slate-400');
             });
             
+            // Highlight tombol klik
             if (event && event.currentTarget) {
-                event.currentTarget.classList.add('bg-blue-600', 'text-white', 'shadow-sm', 'shadow-blue-900/20', 'active-link');
+                event.currentTarget.classList.add('bg-blue-600', 'text-white', 'shadow-sm', 'active-link');
                 event.currentTarget.classList.remove('text-slate-400');
             }
             
+            // Breadcrumb Titles
             const titles = {
                 'dashboard': 'Ringkasan Gudang',
-                'master': 'Data Cat & Chemical',
                 'inventory': 'Histori Transaksi',
                 'stock': 'Saldo Stok Material',
+                'master': 'Database Cat & Chemical',
                 'update': 'Form In / Out'
             };
             document.getElementById('sectionTitle').innerText = titles[id] || 'Warehouse';
@@ -222,18 +223,15 @@
 
             if (window.innerWidth < 768) sidebar.classList.add('-translate-x-full');
             
-            // Trigger Render sesuai Section
-            if(id === 'master' && typeof renderMasterData === 'function') {
-                renderMasterData(catChemicalMaster);
+            // Pemicu Render Berdasarkan Section
+            if(id === 'master' && typeof renderManageMaster === 'function') {
+                renderManageMaster(catChemicalMaster); // Gunakan data master dari dashboard.js
             }
             if(id === 'inventory' && typeof renderInventoryTable === 'function') {
                 renderInventoryTable(inventoryData);
             }
             if(id === 'stock' && typeof renderStockSummary === 'function') {
                 renderStockSummary(inventoryData);
-            }
-            if(id === 'update' && typeof renderInputForm === 'function') {
-                renderInputForm();
             }
         }
     </script>
