@@ -6,58 +6,155 @@
     <title>Dashboard - Inventory System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Sembunyikan scrollbar untuk tampilan yang lebih bersih */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
 </head>
-<body class="bg-gray-100 flex">
+<body class="bg-gray-100">
 
-    <div class="w-64 h-screen bg-slate-800 text-white flex flex-col fixed">
-        <div class="p-6 text-2xl font-bold border-b border-slate-700">
-            🎨 Inv-Gudang
-        </div>
-        
-        <nav class="flex-grow p-4 space-y-2">
-            <a href="#" class="block py-2.5 px-4 rounded bg-blue-600 hover:bg-blue-500 transition">Dashboard</a>
-            <a href="#" class="block py-2.5 px-4 rounded hover:bg-slate-700 transition">Data Inventory</a>
-            
-            <div id="adminMenu" class="hidden pt-4 border-t border-slate-700">
-                <p class="text-xs text-gray-400 mb-2 px-4 uppercase">Admin Area</p>
-                <a href="#" class="block py-2.5 px-4 rounded hover:bg-slate-700 transition">Update Stock</a>
-                <a href="#" class="block py-2.5 px-4 rounded hover:bg-slate-700 transition">Tambah Barang</a>
-            </div>
-        </nav>
-
-        <div class="p-4 border-t border-slate-700 text-sm">
-            <p id="userRoleDisplay" class="mb-2 text-blue-300 font-semibold"></p>
-            <button onclick="logout()" class="w-full bg-red-500 py-2 rounded hover:bg-red-600">Logout</button>
-        </div>
+    <div class="md:hidden bg-slate-800 text-white p-4 flex justify-between items-center sticky top-0 z-50">
+        <span class="font-bold">🎨 Inv-Gudang</span>
+        <button id="mobileMenuBtn" class="p-2 focus:outline-none">
+            <i data-lucide="menu"></i>
+        </button>
     </div>
 
-    <div class="ml-64 p-8 w-full">
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-2xl font-bold text-gray-800">Ringkasan Gudang Material</h1>
-            <div id="statusBadge" class="px-4 py-1 rounded-full text-sm font-semibold"></div>
-        </header>
+    <div class="flex">
+        <div id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-slate-800 text-white transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+            <div class="p-6 text-2xl font-bold border-b border-slate-700 flex justify-between items-center">
+                <span>🎨 Inv-Gudang</span>
+                <button class="md:hidden" id="closeSidebar">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            
+            <nav class="flex-grow p-4 space-y-2 overflow-y-auto no-scrollbar">
+                <a href="#" onclick="showSection('dashboard')" class="nav-link flex items-center gap-3 py-2.5 px-4 rounded bg-blue-600 hover:bg-blue-500 transition">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </a>
+                <a href="#" onclick="showSection('inventory')" class="nav-link flex items-center gap-3 py-2.5 px-4 rounded hover:bg-slate-700 transition">
+                    <i data-lucide="package" class="w-5 h-5"></i> Data Inventory
+                </a>
+                <a href="#" onclick="showSection('stock')" class="nav-link flex items-center gap-3 py-2.5 px-4 rounded hover:bg-slate-700 transition">
+                    <i data-lucide="database" class="w-5 h-5"></i> Stock Barang
+                </a>
+                
+                <div id="adminMenu" class="hidden pt-4 border-t border-slate-700">
+                    <p class="text-xs text-gray-400 mb-2 px-4 uppercase tracking-wider">Admin Area</p>
+                    <a href="#" onclick="showSection('update')" class="nav-link flex items-center gap-3 py-2.5 px-4 rounded hover:bg-slate-700 transition">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i> Input In/Out
+                    </a>
+                </div>
+            </nav>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
-                <p class="text-sm text-gray-500 uppercase font-bold">Total Item</p>
-                <p id="totalItem" class="text-3xl font-bold">--</p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-yellow-500">
-                <p class="text-sm text-gray-500 uppercase font-bold">Stok Menipis</p>
-                <p id="lowStock" class="text-3xl font-bold">--</p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
-                <p class="text-sm text-gray-500 uppercase font-bold">Total Chemical</p>
-                <p id="chemCount" class="text-3xl font-bold">--</p>
+            <div class="p-4 border-t border-slate-700 text-sm bg-slate-900">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i data-lucide="user" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <div>
+                        <p id="userRoleDisplay" class="font-semibold text-blue-300 leading-none"></p>
+                        <p class="text-[10px] text-gray-400">Online</p>
+                    </div>
+                </div>
+                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-500 border border-red-500/50 py-2 rounded hover:bg-red-500 hover:text-white transition">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                </button>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-sm">
-            <h3 class="font-bold mb-4">Stock Overview</h3>
-            <p class="text-gray-400 italic">Data akan ditarik dari Google Spreadsheet...</p>
+        <div class="flex-1 md:ml-64 min-h-screen">
+            <main class="p-4 md:p-8">
+                <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h1 id="sectionTitle" class="text-2xl font-bold text-gray-800">Ringkasan Gudang</h1>
+                        <p class="text-gray-500 text-sm">Material Cat & Chemical System</p>
+                    </div>
+                    <div id="statusBadge" class="w-fit px-4 py-1.5 rounded-full text-xs font-bold shadow-sm"></div>
+                </header>
+
+                <section id="dashboard-section">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-blue-500">
+                            <div class="flex justify-between items-center">
+                                <p class="text-sm text-gray-500 uppercase font-bold">Total Item</p>
+                                <i data-lucide="box" class="text-blue-500 w-5 h-5"></i>
+                            </div>
+                            <p id="totalItem" class="text-3xl font-bold mt-2">--</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-yellow-500">
+                            <div class="flex justify-between items-center">
+                                <p class="text-sm text-gray-500 uppercase font-bold">Stok Menipis</p>
+                                <i data-lucide="alert-triangle" class="text-yellow-500 w-5 h-5"></i>
+                            </div>
+                            <p id="lowStock" class="text-3xl font-bold mt-2">--</p>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-b-4 border-green-500">
+                            <div class="flex justify-between items-center">
+                                <p class="text-sm text-gray-500 uppercase font-bold">Total Chemical</p>
+                                <i data-lucide="flask-conical" class="text-green-500 w-5 h-5"></i>
+                            </div>
+                            <p id="chemCount" class="text-3xl font-bold mt-2">--</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <i data-lucide="history" class="w-5 h-5 text-gray-400"></i> Aktivitas Terakhir
+                        </h3>
+                        <div class="text-gray-400 italic text-center py-10">
+                            Menghubungkan ke Google Spreadsheet...
+                        </div>
+                    </div>
+                </section>
+
+                <section id="inventory-section" class="hidden">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+                        <p>Konten Tabel Inventory akan muncul di sini.</p>
+                    </div>
+                </section>
+            </main>
         </div>
     </div>
 
     <script src="dashboard.js"></script>
+    <script>
+        // Inisialisasi Icon Lucide
+        lucide.createIcons();
+
+        // Logika Sidebar Mobile
+        const sidebar = document.getElementById('sidebar');
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const closeSidebar = document.getElementById('closeSidebar');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            sidebar.classList.remove('-translate-x-full');
+        });
+
+        closeSidebar.addEventListener('click', () => {
+            sidebar.classList.add('-translate-x-full');
+        });
+
+        // Fungsi Ganti Menu (SPA Style)
+        function showSection(sectionId) {
+            // Sembunyikan semua section
+            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+            // Tampilkan yang dipilih
+            document.getElementById(sectionId + '-section').classList.remove('hidden');
+            
+            // Update Judul
+            const titles = {
+                'dashboard': 'Ringkasan Gudang',
+                'inventory': 'Data Inventory (Log In/Out)',
+                'stock': 'Total Stock Saat Ini',
+                'update': 'Update Data Baru'
+            };
+            document.getElementById('sectionTitle').innerText = titles[sectionId];
+            
+            // Tutup sidebar di mobile setelah klik
+            if (window.innerWidth < 768) sidebar.classList.add('-translate-x-full');
+        }
+    </script>
 </body>
 </html>
