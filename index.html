@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Gudang Cat & Chemical</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        body { background-color: #f8f9fa; }
+        .dashboard-card { border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header-bg { background: #003366; color: white; padding: 20px 0; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+
+<div class="header-bg text-center">
+    <h2>DASHBOARD INVENTORY GUDANG</h2>
+    <p>Material Cat & Chemical</p>
+</div>
+
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card dashboard-card bg-primary text-white p-3">
+                <h5>Total Barang Masuk</h5>
+                <h2 id="totalIn">0</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card dashboard-card bg-success text-white p-3">
+                <h5>Stok Tersedia (Liter)</h5>
+                <h2 id="totalStock">0</h2>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card dashboard-card bg-danger text-white p-3">
+                <h5>Mendekati Expired</h5>
+                <h2 id="totalExpired">0</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="card dashboard-card p-4">
+        <div class="d-flex justify-content-between mb-3">
+            <h4>Data Inventory (Real-time)</h4>
+            <input type="text" id="searchInput" class="form-control w-25" placeholder="Cari nama barang atau part number...">
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered" id="inventoryTable">
+                <thead class="table-dark">
+                    <tr id="tableHeader">
+                        </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="15" class="text-center">Memuat data dari Google Sheets...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // GANTI LINK DI BAWAH INI DENGAN LINK CSV GOOGLE SHEETS ANDA
+    const public_spreadsheet_url = 'MASUKKAN_LINK_CSV_ANDA_DI_SINI';
+
+    function init() {
+        Papa.parse(public_spreadsheet_url, {
+            download: true,
+            header: true,
+            complete: showInfo
+        });
+    }
+
+    function showInfo(results) {
+        const data = results.data;
+        const body = document.getElementById('tableBody');
+        const header = document.getElementById('tableHeader');
+        
+        // Buat Header Tabel Otomatis
+        if (data.length > 0) {
+            header.innerHTML = Object.keys(data[0]).map(key => `<th>${key}</th>`).join('');
+        }
+
+        // Tampilkan Baris Data
+        body.innerHTML = '';
+        let totalLiter = 0;
+        let countIn = 0;
+
+        data.forEach(row => {
+            if(row['NAMA PRODUK']) { // Pastikan baris tidak kosong
+                const tr = document.createElement('tr');
+                tr.innerHTML = Object.values(row).map(val => `<td>${val}</td>`).join('');
+                body.appendChild(tr);
+
+                // Logika Dashboard Sederhana
+                if(row['STATUS'] === 'IN') countIn++;
+                totalLiter += parseFloat(row['QTY (LITER)']) || 0;
+            }
+        });
+
+        // Update Widget Dashboard
+        document.getElementById('totalIn').innerText = countIn;
+        document.getElementById('totalStock').innerText = totalLiter.toLocaleString('id-ID');
+    }
+
+    // Fungsi Pencarian
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        const filter = this.value.toUpperCase();
+        const rows = document.querySelector("#tableBody").rows;
+        for (let i = 0; i < rows.length; i++) {
+            const cells = rows[i].cells;
+            let match = false;
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j].innerText.toUpperCase().indexOf(filter) > -1) {
+                    match = true;
+                    break;
+                }
+            }
+            rows[i].style.display = match ? "" : "none";
+        }
+    });
+
+    window.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
