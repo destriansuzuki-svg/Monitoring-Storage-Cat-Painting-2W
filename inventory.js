@@ -1,5 +1,5 @@
 /**
- * MODULE: INVENTORY (RESPONSIVE TABLE TO CARD)
+ * MODULE: INVENTORY (WITH ACTION BUTTONS)
  */
 
 function renderInventoryTable(data) {
@@ -15,15 +15,13 @@ function renderInventoryTable(data) {
                             <th class="p-2 border-r">TANGGAL</th>
                             <th class="p-2 border-r">NO SURAT JALAN</th>
                             <th class="p-2 border-r">PART NUMBER</th>
-                            <th class="p-2 border-r" style="min-w: 150px;">NAMA PRODUK</th>
+                            <th class="p-2 border-r" style="min-width: 150px;">NAMA PRODUK</th>
                             <th class="p-2 border-r">SUPPLIER</th>
                             <th class="p-2 border-r">NO. LOT</th>
                             <th class="p-2 border-r text-red-600">EXPIRED</th>
-                            <th class="p-2 border-r text-orange-600">REV. EXP</th>
-                            <th class="p-2 border-r text-center">VOL(L)</th>
-                            <th class="p-2 border-r text-center">QTY(K)</th>
                             <th class="p-2 border-r text-center">QTY(L)</th>
                             <th class="p-2 border-r text-center">STATUS</th>
+                            <th class="p-2 text-center">AKSI</th>
                         </tr>
                     </thead>
                     <tbody id="inventoryBody" class="text-slate-600 divide-y divide-slate-100"></tbody>
@@ -39,22 +37,23 @@ function renderInventoryTable(data) {
     
     if (data.length === 0) {
         const emptyMsg = `<p class="p-10 text-center text-slate-400 italic text-xs">Belum ada data transaksi.</p>`;
-        tbody.innerHTML = emptyMsg;
+        tbody.innerHTML = `<tr><td colspan="11">${emptyMsg}</td></tr>`;
         cardContainer.innerHTML = emptyMsg;
         return;
     }
 
-    // RENDER DESKTOP ROWS
     tbody.innerHTML = data.map((item, index) => renderRow(item, index)).join('');
-
-    // RENDER MOBILE CARDS
     cardContainer.innerHTML = data.map((item, index) => renderCard(item, index)).join('');
+    
+    // Inisialisasi ulang icon lucide jika ada
+    if(typeof lucide !== 'undefined') lucide.createIcons();
 }
 
-// Helper 1: Template Baris Tabel (Desktop)
+// Helper 1: Desktop Row
 function renderRow(item, index) {
     const limit = 30;
     const namaSingkat = item.produk.length > limit ? item.produk.substring(0, limit) + '...' : item.produk;
+    
     return `
         <tr class="hover:bg-slate-50 transition-colors">
             <td class="p-2 border-r text-center">${index + 1}</td>
@@ -63,61 +62,105 @@ function renderRow(item, index) {
             <td class="p-2 border-r font-bold text-slate-800">${item.partNo}</td>
             <td class="p-2 border-r text-[9px]">
                 <span id="text-d-${index}">${namaSingkat}</span>
-                ${item.produk.length > limit ? `<button onclick="toggleReadMore(${index}, '${item.produk}', 'd')" class="text-blue-600 font-bold ml-1 text-[8px]">Read More</button>` : ''}
             </td>
             <td class="p-2 border-r text-[9px]">${item.supplier}</td>
             <td class="p-2 border-r font-mono">${item.lot}</td>
             <td class="p-2 border-r text-red-600 font-bold">${item.exp}</td>
-            <td class="p-2 border-r text-orange-600 font-bold">${item.revExp || '-'}</td>
-            <td class="p-2 border-r text-center">${item.volLiter}</td>
-            <td class="p-2 border-r text-center">${item.qtyKaleng}</td>
             <td class="p-2 border-r text-center font-black">${item.qtyLiter}</td>
-            <td class="p-2 text-center">
+            <td class="p-2 border-r text-center">
                 <span class="px-1.5 py-0.5 rounded text-[8px] font-black ${item.status === 'IN' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${item.status}</span>
+            </td>
+            <td class="p-2 text-center">
+                <div class="flex justify-center gap-1">
+                    <button onclick="handleEditTransaction('${item.sj}', '${item.partNo}')" class="p-1 bg-amber-50 text-amber-600 rounded hover:bg-amber-100">
+                        <i data-lucide="edit-3" class="w-3 h-3"></i>
+                    </button>
+                    <button onclick="handleDeleteTransaction('${item.sj}', '${item.partNo}')" class="p-1 bg-red-50 text-red-600 rounded hover:bg-red-100">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
+                </div>
             </td>
         </tr>
     `;
 }
 
-// Helper 2: Template Kartu (Mobile)
+// Helper 2: Mobile Card
 function renderCard(item, index) {
-    const limit = 50;
-    const namaSingkat = item.produk.length > limit ? item.produk.substring(0, limit) + '...' : item.produk;
     return `
-        <div class="p-4 space-y-3 relative bg-white">
+        <div class="p-4 space-y-3 relative bg-white border-l-4 ${item.status === 'IN' ? 'border-green-500' : 'border-red-500'}">
             <div class="flex justify-between items-start">
                 <div>
-                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">${item.tgl} • ${item.sj}</p>
+                    <p class="text-[9px] font-bold text-slate-400 uppercase">${item.tgl} • SJ: ${item.sj}</p>
                     <h4 class="text-xs font-black text-slate-900 mt-0.5">${item.partNo}</h4>
                 </div>
-                <span class="px-2 py-1 rounded text-[10px] font-black ${item.status === 'IN' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${item.status}</span>
+                <div class="flex gap-2">
+                    <button onclick="handleEditTransaction('${item.sj}', '${item.partNo}')" class="p-1.5 bg-slate-100 text-slate-600 rounded-lg">
+                        <i data-lucide="edit-3" class="w-3 h-3"></i>
+                    </button>
+                    <button onclick="handleDeleteTransaction('${item.sj}', '${item.partNo}')" class="p-1.5 bg-red-50 text-red-600 rounded-lg">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
+                </div>
             </div>
-            
-            <div class="text-[11px] text-slate-600 leading-snug">
-                <span id="text-m-${index}">${namaSingkat}</span>
-                ${item.produk.length > limit ? `<button onclick="toggleReadMore(${index}, '${item.produk}', 'm')" class="text-blue-600 font-bold text-[10px] ml-1">Read More</button>` : ''}
-            </div>
-
-            <div class="grid grid-cols-3 gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100 text-center">
-                <div><p class="text-[8px] text-slate-400 font-bold">EXP</p><p class="text-[10px] font-bold text-red-500">${item.exp}</p></div>
-                <div><p class="text-[8px] text-slate-400 font-bold">QTY(K)</p><p class="text-[10px] font-bold text-slate-800">${item.qtyKaleng}</p></div>
-                <div><p class="text-[8px] text-slate-400 font-bold">QTY(L)</p><p class="text-[10px] font-black text-blue-600">${item.qtyLiter}L</p></div>
+            <p class="text-[10px] text-slate-600">${item.produk}</p>
+            <div class="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-lg text-[10px]">
+                <p><b>LOT:</b> ${item.lot}</p>
+                <p class="text-right"><b>QTY:</b> ${item.qtyLiter} L</p>
             </div>
         </div>
     `;
 }
 
-// Fungsi Read More Adaptif
-function toggleReadMore(index, fullText, type) {
-    const el = document.getElementById(`text-${type}-${index}`);
-    const btn = el.nextElementSibling;
-    const limit = type === 'd' ? 30 : 50;
-    
-    if (btn.innerText === "Read More") {
-        el.innerText = fullText;
-        btn.innerText = "Hide";
-    } else {
-        el.innerText = fullText.substring(0, limit) + '...';
-        btn.innerText = "Read More";
+/**
+ * LOGIKA ACTION (HAPUS & EDIT)
+ */
+
+async function handleDeleteTransaction(noSJ, partNo) {
+    const result = await Swal.fire({
+        title: 'Hapus Transaksi?',
+        text: `Data SJ: ${noSJ} untuk Part: ${partNo} akan dihapus permanen.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        confirmButtonText: 'Ya, Hapus'
+    });
+
+    if (result.isConfirmed) {
+        // Mengirim request action hapus transaksi ke Spreadsheet
+        saveToSpreadsheet({ 
+            action: 'delete_transaction', 
+            noSuratJalan: noSJ,
+            partNumber: partNo 
+        });
     }
+}
+
+function handleEditTransaction(noSJ, partNo) {
+    // Cari data di local array
+    const data = inventoryData.find(i => i.sj === noSJ && i.partNo === partNo);
+    if(!data) return;
+
+    Swal.fire({
+        title: 'Edit Transaksi',
+        html: `
+            <div class="text-left space-y-2 text-xs">
+                <label class="font-bold">Quantity (Kaleng)</label>
+                <input id="edit-qtyK" type="number" class="swal2-input !m-0 !w-full" value="${data.qtyKaleng}">
+                <label class="font-bold">Lokasi</label>
+                <input id="edit-lokasi" class="swal2-input !m-0 !w-full" value="${data.lokasi}">
+            </div>
+        `,
+        confirmButtonText: 'Update SJ',
+        preConfirm: () => {
+            return {
+                action: 'edit_transaction',
+                noSuratJalan: noSJ,
+                partNumber: partNo,
+                qtyKaleng: document.getElementById('edit-qtyK').value,
+                lokasi: document.getElementById('edit-lokasi').value
+            }
+        }
+    }).then(res => {
+        if(res.isConfirmed) saveToSpreadsheet(res.value);
+    });
 }
