@@ -183,8 +183,12 @@
         </div>
     </div>
 
-    <script src="dashboard.js"></script> <script>
-        // Inisialisasi Icon
+    <script src="inventory.js"></script>
+    <script src="stock.js"></script>
+    <script src="dashboard.js"></script> 
+
+    <script>
+        // Inisialisasi Icon Lucide
         lucide.createIcons();
 
         // Responsive Sidebar Logic
@@ -197,7 +201,7 @@
 
         // Navigasi Section (SPA)
         function showSection(id) {
-            // Sembunyikan semua
+            // Sembunyikan semua section
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             
             // Tampilkan target
@@ -209,7 +213,11 @@
                 btn.classList.remove('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/20');
                 btn.classList.add('hover:bg-slate-800', 'text-slate-300');
             });
-            event.currentTarget.classList.add('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/20');
+            
+            // Pastikan event currentTarget ada sebelum manipulasi class
+            if (event && event.currentTarget) {
+                event.currentTarget.classList.add('bg-blue-600', 'text-white', 'shadow-lg', 'shadow-blue-500/20');
+            }
             
             // Update Teks Header & Breadcrumb
             const titles = {
@@ -224,9 +232,16 @@
             // Tutup sidebar di mobile
             if (window.innerWidth < 768) sidebar.classList.add('-translate-x-full');
             
-            // Trigger render modul terkait (kita siapkan fungsinya di JS terpisah)
-            if(id === 'inventory' && typeof renderInventoryTable === 'function') renderInventoryTable(inventoryData);
-            if(id === 'stock' && typeof renderStockSummary === 'function') renderStockSummary(inventoryData);
+            /** * PENTING: inventoryData diambil dari dashboard.js
+             * renderInventoryTable diambil dari inventory.js
+             * renderStockSummary diambil dari stock.js
+             */
+            if(id === 'inventory' && typeof renderInventoryTable === 'function') {
+                renderInventoryTable(inventoryData);
+            }
+            if(id === 'stock' && typeof renderStockSummary === 'function') {
+                renderStockSummary(inventoryData);
+            }
         }
     </script>
 </body>
