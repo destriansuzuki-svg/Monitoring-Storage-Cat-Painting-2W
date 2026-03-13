@@ -1,6 +1,6 @@
 /**
- * MODULE: INVENTORY (ADVANCED FEATURES - FULL COMPACT)
- * Menampilkan 15 Kolom: NO, TGL, SJ, PART, PRODUK, SUPP, LOT, EXP, REV, VOL, QTY K, QTY L, LOKASI, STAT, KET
+ * MODULE: INVENTORY (ULTRA COMPACT - ANTI SCROLL)
+ * Optimasi: 15 Kolom dalam 1 Halaman menggunakan teknik Persentase & Truncate Tooltip.
  */
 
 let currentInventoryData = [];
@@ -37,26 +37,26 @@ function renderInventoryTable(data) {
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div class="hidden md:block overflow-hidden">
-                <table class="w-full text-left border-collapse table-fixed" style="font-size: 8.5px;">
+            <div class="hidden md:block">
+                <table class="w-full text-left border-collapse table-fixed" style="font-size: 8px;">
                     <thead class="bg-slate-100 text-slate-700 font-bold uppercase border-b border-slate-200">
                         <tr>
-                            <th class="p-2 border-r text-center w-[30px]">NO</th>
-                            <th class="p-2 border-r w-[70px]">TANGGAL</th>
-                            <th class="p-2 border-r w-[100px]">SJ</th>
-                            <th class="p-2 border-r w-[100px]">PART NO</th>
-                            <th class="p-2 border-r w-[150px]">PRODUK</th>
-                            <th class="p-2 border-r w-[80px]">SUPP</th>
-                            <th class="p-2 border-r w-[80px]">LOT</th>
-                            <th class="p-2 border-r text-red-600 w-[60px]">EXP</th>
-                            <th class="p-2 border-r text-orange-600 w-[60px]">REV</th>
-                            <th class="p-2 border-r text-center w-[40px]">VOL</th>
-                            <th class="p-2 border-r text-center w-[35px]">K</th>
-                            <th class="p-2 border-r text-center w-[50px]">QTY L</th>
-                            <th class="p-2 border-r w-[70px]">LOKASI</th>
-                            <th class="p-2 border-r text-center w-[40px]">STAT</th>
-                            <th class="p-2 border-r">KET</th>
-                            <th class="p-2 text-center w-[60px]">AKSI</th>
+                            <th class="p-2 border-r text-center" style="width: 2.5%;">NO</th>
+                            <th class="p-2 border-r" style="width: 6.5%;">TANGGAL</th>
+                            <th class="p-2 border-r" style="width: 8%;">SJ</th>
+                            <th class="p-2 border-r" style="width: 9%;">PART NO</th>
+                            <th class="p-2 border-r" style="width: 14%;">PRODUK</th>
+                            <th class="p-2 border-r" style="width: 8%;">SUPP</th>
+                            <th class="p-2 border-r" style="width: 7%;">LOT</th>
+                            <th class="p-2 border-r text-red-600" style="width: 6.5%;">EXP</th>
+                            <th class="p-2 border-r text-orange-600" style="width: 6.5%;">REV</th>
+                            <th class="p-2 border-r text-center" style="width: 3.5%;">VOL</th>
+                            <th class="p-2 border-r text-center" style="width: 3%;">K</th>
+                            <th class="p-2 border-r text-center font-bold" style="width: 4.5%;">QTY L</th>
+                            <th class="p-2 border-r text-center" style="width: 7%;">LOKASI</th>
+                            <th class="p-2 border-r text-center" style="width: 3.5%;">ST</th>
+                            <th class="p-2 border-r" style="width: 10%;">KET</th>
+                            <th class="p-2 text-center" style="width: 4.5%;">AKSI</th>
                         </tr>
                     </thead>
                     <tbody id="inventoryBody" class="text-slate-600 divide-y divide-slate-100 bg-white"></tbody>
@@ -85,32 +85,38 @@ function renderRows(data) {
 
     // --- RENDER TABLE DESKTOP ---
     tbody.innerHTML = data.map((item, index) => `
-        <tr class="hover:bg-slate-50 transition-colors bg-white">
+        <tr class="hover:bg-blue-50/50 transition-colors bg-white">
             <td class="p-2 border-r text-center font-bold">${index + 1}</td>
-            <td class="p-2 border-r truncate text-[8px]">${item.tgl || item.tanggal || '-'}</td>
-            <td class="p-2 border-r font-mono truncate" title="${item.sj}">${item.sj || item.noSuratJalan || '-'}</td>
-            <td class="p-2 border-r font-bold text-blue-600 truncate" title="${item.partNo}">${item.partNo || item.partNumber || '-'}</td>
-            <td class="p-2 border-r truncate" title="${item.produk}">${item.produk || item.namaProduk || '-'}</td>
-            <td class="p-2 border-r truncate text-[8px]">${item.supplier || '-'}</td>
-            <td class="p-2 border-r font-mono truncate">${item.lot || '-'}</td>
-            <td class="p-2 border-r text-red-600 font-bold">${item.exp || '-'}</td>
-            <td class="p-2 border-r text-orange-600 font-bold">${item.revExp || item.revExpired || '-'}</td>
-            <td class="p-2 border-r text-center">${item.volLiter || item.volumeLiter || '0'}</td>
+            <td class="p-2 border-r truncate">${item.tgl || item.tanggal || '-'}</td>
+            <td class="p-2 border-r font-mono truncate" title="${item.sj || '-'}">${item.sj || item.noSuratJalan || '-'}</td>
+            <td class="p-2 border-r font-bold text-blue-600 truncate" title="${item.partNo || '-'}">${item.partNo || item.partNumber || '-'}</td>
+            <td class="p-2 border-r truncate font-medium" title="${item.produk || '-'}">${item.produk || item.namaProduk || '-'}</td>
+            <td class="p-2 border-r truncate" title="${item.supplier || '-'}">${item.supplier || '-'}</td>
+            <td class="p-2 border-r font-mono truncate" title="${item.lot || '-'}">${item.lot || '-'}</td>
+            <td class="p-2 border-r text-red-600 font-bold whitespace-nowrap">${item.exp || '-'}</td>
+            <td class="p-2 border-r text-orange-600 font-bold whitespace-nowrap">${item.revExp || item.revExpired || '-'}</td>
+            <td class="p-2 border-r text-center font-bold">${item.volLiter || '0'}</td>
             <td class="p-2 border-r text-center">${item.qtyKaleng || '0'}</td>
-            <td class="p-2 border-r text-center font-black">${item.qtyLiter || '0'}</td>
-            <td class="p-2 border-r font-bold uppercase text-[8px] truncate">${item.lokasi || '-'}</td>
-            <td class="p-2 border-r text-center font-black text-[7px] ${item.status === 'IN' ? 'text-green-600' : 'text-red-600'}">${item.status}</td>
-            <td class="p-2 border-r italic text-slate-400 truncate" title="${item.keterangan}">${item.keterangan || item.ket || '-'}</td>
+            <td class="p-2 border-r text-center font-black bg-slate-50">${item.qtyLiter || '0'}</td>
+            <td class="p-2 border-r text-center font-bold truncate" title="${item.lokasi || '-'}">${item.lokasi || '-'}</td>
+            <td class="p-2 border-r text-center">
+                <span class="font-black ${item.status === 'IN' ? 'text-green-600' : 'text-red-600'}">${item.status}</span>
+            </td>
+            <td class="p-2 border-r italic text-slate-400 truncate" title="${item.keterangan || '-'}">${item.keterangan || item.ket || '-'}</td>
             <td class="p-2 text-center">
                 <div class="flex justify-center gap-1">
-                    <button onclick="handleEditTransaction('${item.sj || item.noSuratJalan}', '${item.partNo || item.partNumber}')" class="text-amber-600 hover:text-amber-800"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
-                    <button onclick="handleDeleteTransaction('${item.sj || item.noSuratJalan}', '${item.partNo || item.partNumber}')" class="text-red-600 hover:text-red-800"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                    <button onclick="handleEditTransaction('${item.sj || item.noSuratJalan}', '${item.partNo || item.partNumber}')" class="text-amber-500 hover:text-amber-700">
+                        <i data-lucide="edit-3" class="w-3 h-3"></i>
+                    </button>
+                    <button onclick="handleDeleteTransaction('${item.sj || item.noSuratJalan}', '${item.partNo || item.partNumber}')" class="text-red-500 hover:text-red-700">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
                 </div>
             </td>
         </tr>
     `).join('');
 
-    // --- RENDER MOBILE CARDS ---
+    // --- RENDER MOBILE CARDS (Tetap Sama) ---
     cardContainer.innerHTML = data.map((item, index) => {
         const statusColor = item.status === 'IN' ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50';
         return `
@@ -118,20 +124,20 @@ function renderRows(data) {
             <div class="flex justify-between items-start mb-2">
                 <div>
                     <span class="text-[9px] font-bold text-slate-400 uppercase">#${index + 1} | ${item.tgl || item.tanggal}</span>
-                    <h3 class="text-xs font-bold text-blue-600 leading-none mt-1">${item.partNo || item.partNumber}</h3>
+                    <h3 class="text-xs font-bold text-blue-600 mt-1">${item.partNo || item.partNumber}</h3>
                 </div>
                 <span class="px-2 py-0.5 rounded text-[9px] font-black ${statusColor}">${item.status}</span>
             </div>
             <p class="text-[10px] text-slate-600 font-medium mb-3 truncate w-full">${item.produk || item.namaProduk}</p>
             <div class="grid grid-cols-2 gap-y-2 gap-x-4">
-                <div class="flex flex-col"><span class="text-[8px] text-slate-400 uppercase font-bold text-[7px]">No. SJ / Lot</span><span class="text-[10px] font-mono truncate">${item.sj || '-'} / ${item.lot || '-'}</span></div>
-                <div class="flex flex-col"><span class="text-[8px] text-slate-400 uppercase font-bold text-[7px]">Lokasi</span><span class="text-[10px] font-bold">${item.lokasi || '-'}</span></div>
-                <div class="flex flex-col"><span class="text-[8px] text-red-400 uppercase font-bold text-[7px]">Exp Date</span><span class="text-[10px] font-bold text-red-600">${item.exp || '-'}</span></div>
-                <div class="flex flex-col"><span class="text-[8px] text-slate-400 uppercase font-bold text-[7px]">Qty (L)</span><span class="text-[10px] font-black">${item.qtyLiter || '0'} L</span></div>
+                <div class="flex flex-col"><span class="text-[7px] text-slate-400 uppercase font-bold">No. SJ / Lot</span><span class="text-[10px] font-mono truncate">${item.sj || '-'} / ${item.lot || '-'}</span></div>
+                <div class="flex flex-col"><span class="text-[7px] text-slate-400 uppercase font-bold">Lokasi</span><span class="text-[10px] font-bold">${item.lokasi || '-'}</span></div>
+                <div class="flex flex-col"><span class="text-[7px] text-red-400 uppercase font-bold">Exp Date</span><span class="text-[10px] font-bold text-red-600">${item.exp || '-'}</span></div>
+                <div class="flex flex-col"><span class="text-[7px] text-slate-400 uppercase font-bold">Qty (L)</span><span class="text-[10px] font-black">${item.qtyLiter || '0'} L</span></div>
             </div>
             <div class="mt-4 flex justify-end gap-2 pt-3 border-t border-slate-50">
-                <button onclick="handleEditTransaction('${item.sj || item.noSuratJalan}', '${item.partNo || item.partNumber}')" class="px-3 py-1.5 bg-amber-50 text-amber-600 rounded text-[10px] font-bold uppercase tracking-wider">Edit</button>
-                <button onclick="handleDeleteTransaction('${item.sj || item.noSuratJalan}', '${item.partNo || item.partNumber}')" class="px-3 py-1.5 bg-red-50 text-red-600 rounded text-[10px] font-bold uppercase tracking-wider">Hapus</button>
+                <button onclick="handleEditTransaction('${item.sj || item.noSuratJalan}', '${item.partNo || item.partNumber}')" class="px-3 py-1 bg-amber-50 text-amber-600 rounded text-[10px] font-bold uppercase">Edit</button>
+                <button onclick="handleDeleteTransaction('${item.sj || item.noSuratJalan}', '${item.partNo || item.partNumber}')" class="px-3 py-1 bg-red-50 text-red-600 rounded text-[10px] font-bold uppercase">Hapus</button>
             </div>
         </div>`;
     }).join('');
