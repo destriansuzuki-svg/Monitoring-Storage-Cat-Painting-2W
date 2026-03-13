@@ -1,181 +1,212 @@
 /**
  * master.js - Logic Database Cat & Chemical
+ * Tampilan: Tabel Fixed (Desktop) & Cards (Mobile)
  * Sesuai format: NO, ENTRY DATE, PART NUMBER, NAMA PRODUK, SUPPLIER, SATUAN
  */
 
-// 1. Fungsi Utama: Menampilkan Data ke HTML
+let currentMasterData = [];
+
+// 1. Fungsi Utama: Render Data
 function renderManageMaster(data) {
+    currentMasterData = data;
     const container = document.getElementById('masterContainer');
     if (!container) return;
 
-    // Bersihkan kontainer sebelum render
-    container.innerHTML = '';
+    // Template Dasar: Layout Tabel Desktop & Container Card Mobile
+    container.innerHTML = `
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="hidden md:block">
+                <table class="w-full text-left border-collapse table-fixed" style="font-size: 11px; width: 100%;">
+                    <thead class="bg-slate-100 text-slate-700 font-bold uppercase border-b border-slate-200">
+                        <tr>
+                            <th class="p-3 border-r text-center" style="width: 5%;">NO</th>
+                            <th class="p-3 border-r" style="width: 15%;">ENTRY DATE</th>
+                            <th class="p-3 border-r" style="width: 15%;">PART NUMBER</th>
+                            <th class="p-3 border-r" style="width: 30%;">NAMA PRODUK</th>
+                            <th class="p-3 border-r" style="width: 15%;">SUPPLIER</th>
+                            <th class="p-3 border-r text-center" style="width: 10%;">SATUAN (L)</th>
+                            <th class="p-3 text-center" style="width: 10%;">AKSI</th>
+                        </tr>
+                    </thead>
+                    <tbody id="masterTableBody" class="text-slate-600 divide-y divide-slate-100 bg-white"></tbody>
+                </table>
+            </div>
 
-    // Jika data tidak ada atau kosong
+            <div id="masterCards" class="md:hidden divide-y divide-slate-100 bg-slate-50"></div>
+        </div>
+    `;
+
+    renderMasterRows(data);
+}
+
+// 2. Fungsi Render Baris & Kartu
+function renderMasterRows(data) {
+    const tbody = document.getElementById('masterTableBody');
+    const cardContainer = document.getElementById('masterCards');
+    
     if (!data || data.length === 0) {
-        container.innerHTML = `
-            <div class="col-span-full text-center py-20 bg-white rounded-xl border border-dashed border-slate-300">
-                <i data-lucide="database-zap" class="w-10 h-10 text-slate-300 mx-auto mb-3"></i>
-                <p class="text-slate-400 text-xs font-medium">Data Cat & Chemical belum tersedia.</p>
+        const emptyHtml = `
+            <div class="p-20 text-center text-slate-400 italic">
+                <i data-lucide="database" class="w-10 h-10 mx-auto mb-2 opacity-20"></i>
+                <p>Data Master tidak ditemukan.</p>
             </div>`;
+        if(tbody) tbody.innerHTML = `<tr><td colspan="7">${emptyHtml}</td></tr>`;
+        if(cardContainer) cardContainer.innerHTML = emptyHtml;
         lucide.createIcons();
         return;
     }
 
-    // Loop data dan buat kartu (Card)
-    let html = '';
-    data.forEach((item, index) => {
-        const noUrut = index + 1;
-        
-        html += `
-            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-slate-100 text-slate-400 text-[10px] font-black px-3 py-1 rounded-bl-xl group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                    #${noUrut}
+    // --- RENDER DESKTOP TABLE ---
+    tbody.innerHTML = data.map((item, index) => `
+        <tr class="hover:bg-blue-50/30 transition-colors">
+            <td class="p-3 border-r text-center font-bold">${index + 1}</td>
+            <td class="p-3 border-r text-slate-500">${item.entryDate || '-'}</td>
+            <td class="p-3 border-r font-bold text-blue-600 font-mono">${item.partNumber || '-'}</td>
+            <td class="p-3 border-r truncate font-medium text-slate-800" title="${item.namaProduk}">${item.namaProduk || '-'}</td>
+            <td class="p-3 border-r truncate">${item.supplier || '-'}</td>
+            <td class="p-3 border-r text-center font-black">${item.satuan || '0'} L</td>
+            <td class="p-3 text-center">
+                <div class="flex justify-center gap-2">
+                    <button onclick="handleEditMaster('${item.partNumber}')" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors">
+                        <i data-lucide="edit-3" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="handleDeleteMaster('${item.partNumber}')" class="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
                 </div>
-                
-                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+            </td>
+        </tr>
+    `).join('');
 
-                <div class="flex justify-between items-start mb-3">
-                    <div>
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-tighter">Part Number</p>
-                        <p class="text-[11px] font-bold text-blue-600">${item.partNumber || 'N/A'}</p>
-                    </div>
-                    
-                    <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity mr-8">
-                        <button onclick="handleEditMaster('${item.partNumber}')" class="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100">
-                            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                        </button>
-                        <button onclick="handleDeleteMaster('${item.partNumber}')" class="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100">
-                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                        </button>
-                    </div>
+    // --- RENDER MOBILE CARDS ---
+    cardContainer.innerHTML = data.map((item, index) => `
+        <div class="p-4 bg-white relative">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <span class="text-[10px] font-black text-slate-300 uppercase">#${index + 1}</span>
+                    <h3 class="text-xs font-bold text-blue-600 mt-1">${item.partNumber || '-'}</h3>
                 </div>
-
-                <h4 class="text-xs font-bold text-slate-800 mb-4 h-9 overflow-hidden leading-snug pr-4">
-                    ${item.namaProduk || 'Tanpa Nama'}
-                </h4>
-                
-                <div class="grid grid-cols-2 gap-3 pt-3 border-t border-slate-50">
-                    <div>
-                        <p class="text-[8px] text-slate-400 uppercase font-bold tracking-widest">Supplier</p>
-                        <p class="text-[10px] font-bold text-slate-700 truncate">${item.supplier || '-'}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[8px] text-slate-400 uppercase font-bold tracking-widest">Satuan</p>
-                        <p class="text-[10px] font-bold text-slate-700 uppercase">${item.satuan || '0'} LITER</p>
-                    </div>
-                </div>
-
-                <div class="mt-3 text-[8px] text-slate-300 font-medium">
-                    Entry Date: ${item.entryDate || '-'}
+                <div class="flex gap-2">
+                    <button onclick="handleEditMaster('${item.partNumber}')" class="p-2 bg-amber-50 text-amber-600 rounded-lg"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                    <button onclick="handleDeleteMaster('${item.partNumber}')" class="p-2 bg-red-50 text-red-600 rounded-lg"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                 </div>
             </div>
-        `;
-    });
+            <p class="text-[11px] font-bold text-slate-700 mb-3">${item.namaProduk || '-'}</p>
+            <div class="grid grid-cols-2 gap-4 border-t pt-3">
+                <div class="flex flex-col">
+                    <span class="text-[8px] text-slate-400 font-black uppercase">Supplier</span>
+                    <span class="text-[10px] font-medium truncate">${item.supplier || '-'}</span>
+                </div>
+                <div class="flex flex-col text-right">
+                    <span class="text-[8px] text-slate-400 font-black uppercase">Satuan</span>
+                    <span class="text-[10px] font-black text-slate-800">${item.satuan || '0'} LITER</span>
+                </div>
+            </div>
+            <div class="mt-2 text-[8px] text-slate-300 font-medium">Entry: ${item.entryDate || '-'}</div>
+        </div>
+    `).join('');
 
-    container.innerHTML = html;
-    lucide.createIcons(); // Penting: Gambar ulang icon Lucide setelah HTML baru masuk
+    lucide.createIcons();
 }
 
-// 2. Fungsi Filter Pencarian (Cari berdasarkan Nama atau Part Number)
+// 3. Pencarian (Filter)
 document.getElementById('searchMaster')?.addEventListener('input', (e) => {
     const keyword = e.target.value.toLowerCase();
-    
-    // Pastikan catChemicalMaster ada di dashboard.js
     if (typeof catChemicalMaster !== 'undefined') {
         const filtered = catChemicalMaster.filter(item => 
             item.namaProduk.toLowerCase().includes(keyword) || 
             item.partNumber.toLowerCase().includes(keyword) ||
             item.supplier.toLowerCase().includes(keyword)
         );
-        renderManageMaster(filtered);
+        renderMasterRows(filtered);
     }
 });
 
-// 3. Fungsi Tambah Data (Pop-up Modal)
+// 4. Integrasi ke Spreadsheet (Simpan/Tambah)
 function openModalAdd() {
     const today = new Date().toLocaleDateString('id-ID', { day:'numeric', month:'short', year:'numeric' });
-    const nextNo = (typeof catChemicalMaster !== 'undefined') ? catChemicalMaster.length + 1 : 1;
     
     Swal.fire({
-        title: `<div class="text-left font-black text-slate-800 text-lg uppercase tracking-tight border-b pb-2">Material Baru <span class="text-blue-600">#${nextNo}</span></div>`,
+        title: 'Tambah Material Baru',
         html: `
-            <div class="text-left space-y-4 p-2 mt-4">
+            <div class="text-left space-y-4 p-2">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Entry Date</label>
-                        <input id="swal-date" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-bold text-slate-500" value="${today}" readonly>
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Entry Date</label>
+                        <input id="swal-date" class="w-full bg-slate-50 border rounded-lg p-2 text-xs font-bold" value="${today}" readonly>
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Part Number</label>
-                        <input id="swal-part" class="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-bold uppercase" placeholder="P001-XXXX">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Part Number</label>
+                        <input id="swal-part" class="w-full border rounded-lg p-2 text-xs font-bold uppercase" placeholder="Contoh: P001">
                     </div>
                 </div>
                 <div>
-                    <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Nama Produk</label>
-                    <input id="swal-nama" class="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Masukkan nama lengkap produk">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Nama Produk</label>
+                    <input id="swal-nama" class="w-full border rounded-lg p-2 text-xs" placeholder="Nama lengkap material">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Supplier</label>
-                        <input id="swal-supplier" class="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Vendor/PT">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Supplier</label>
+                        <input id="swal-supplier" class="w-full border rounded-lg p-2 text-xs" placeholder="Nama Vendor">
                     </div>
                     <div>
-                        <label class="text-[10px] font-bold text-slate-400 uppercase mb-1 block">Satuan (L)</label>
-                        <input id="swal-satuan" type="number" class="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-bold" value="20">
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Satuan (L)</label>
+                        <input id="swal-satuan" type="number" class="w-full border rounded-lg p-2 text-xs font-black" value="20">
                     </div>
                 </div>
             </div>
         `,
+        confirmButtonText: 'Simpan ke Database',
         showCancelButton: true,
-        confirmButtonText: 'Simpan ke Spreadsheet',
-        confirmButtonColor: '#2563eb',
-        cancelButtonText: 'Batal',
-        reverseButtons: true,
         preConfirm: () => {
-            const data = {
-                no: nextNo,
+            const result = {
                 entryDate: document.getElementById('swal-date').value,
                 partNumber: document.getElementById('swal-part').value.toUpperCase(),
                 namaProduk: document.getElementById('swal-nama').value,
                 supplier: document.getElementById('swal-supplier').value,
                 satuan: document.getElementById('swal-satuan').value
             };
-            
-            if (!data.partNumber || !data.namaProduk) {
+            if (!result.partNumber || !result.namaProduk) {
                 Swal.showValidationMessage('Part Number & Nama Produk wajib diisi!');
             }
-            return data;
+            return result;
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Fungsi saveToSpreadsheet harus ada di dashboard.js
-            if (typeof saveToSpreadsheet === 'function') {
-                saveToSpreadsheet({ action: 'add', ...result.value });
-            } else {
-                console.error("Fungsi saveToSpreadsheet tidak ditemukan!");
-            }
+    }).then((res) => {
+        if (res.isConfirmed && typeof saveToSpreadsheet === 'function') {
+            saveToSpreadsheet({ 
+                action: 'add_master', 
+                ...res.value 
+            });
         }
     });
 }
 
-// 4. Placeholder untuk Fungsi Edit & Delete
+// 5. Integrasi Edit & Delete
 function handleEditMaster(partNo) {
-    console.log("Edit item:", partNo);
-    Swal.fire('Info', 'Fitur Edit ' + partNo + ' sedang dikoneksikan ke Spreadsheet', 'info');
+    const data = catChemicalMaster.find(i => i.partNumber === partNo);
+    if(!data) return;
+
+    Swal.fire({
+        title: 'Edit Data Master',
+        html: ``,
+        // ... (Logika mirip Add dengan action: 'edit_master')
+    });
 }
 
 function handleDeleteMaster(partNo) {
     Swal.fire({
-        title: 'Hapus Data?',
-        text: `Material ${partNo} akan dihapus permanen dari database.`,
+        title: 'Hapus Master?',
+        text: `Data ${partNo} akan dihapus permanen.`,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#ef4444',
         confirmButtonText: 'Ya, Hapus'
-    }).then((result) => {
-        if (result.isConfirmed && typeof saveToSpreadsheet === 'function') {
-            saveToSpreadsheet({ action: 'delete', partNumber: partNo });
+    }).then((res) => {
+        if (res.isConfirmed && typeof saveToSpreadsheet === 'function') {
+            saveToSpreadsheet({ 
+                action: 'delete_master', 
+                partNumber: partNo 
+            });
         }
     });
 }
