@@ -7,95 +7,94 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .hidden { display: none; }
-    </style>
 </head>
 <body class="bg-[#f8fafc]">
 
-    <div class="flex min-h-screen">
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-56 bg-[#0f172a] text-slate-400">
-            <div class="p-5 border-b border-slate-800">
-                <span class="font-bold text-white uppercase">Warehouse</span>
-            </div>
-            <nav class="p-3 space-y-1">
-                <button onclick="showSection('dashboard')" class="nav-btn w-full flex items-center gap-2 py-2 px-3 rounded hover:bg-slate-800 text-white bg-blue-600">
-                    <i data-lucide="pie-chart" class="w-4 h-4"></i> Dashboard
-                </button>
-                <button onclick="showSection('inventory')" class="nav-btn w-full flex items-center gap-2 py-2 px-3 rounded hover:bg-slate-800">
-                    <i data-lucide="list-checks" class="w-4 h-4"></i> Transaksi
-                </button>
-            </nav>
-        </aside>
+<div class="flex min-h-screen">
+    <aside class="fixed inset-y-0 left-0 z-40 w-56 bg-[#0f172a] text-white">
+        <div class="p-5 border-b border-slate-800 font-bold uppercase tracking-widest text-sm">Warehouse</div>
+        <nav class="p-3">
+            <button onclick="showSection('dashboard')" class="w-full text-left p-3 rounded bg-blue-600">Dashboard</button>
+        </nav>
+    </aside>
 
-        <main class="flex-1 md:ml-56 p-8">
-            <header class="mb-8 border-b pb-5">
-                <h1 id="sectionTitle" class="text-2xl font-bold text-slate-800">Ringkasan Gudang</h1>
-            </header>
+    <main class="flex-1 md:ml-56 p-8">
+        <header class="mb-8 border-b pb-5 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-slate-800">Dashboard Monitoring</h1>
+            <select id="timeFilter" onchange="updateCharts()" class="bg-white border p-2 rounded text-sm shadow-sm">
+                <option value="weekly">Mingguan</option>
+                <option value="monthly">Bulanan</option>
+            </select>
+        </header>
 
-            <section id="dashboard-section" class="space-y-6">
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="bg-white p-5 rounded border shadow-sm">
-                        <h4 class="font-bold text-slate-700 mb-4">Tren Pengambilan</h4>
-                        <canvas id="dailyUsageChart" class="h-[250px]"></canvas>
-                    </div>
-                    <div class="bg-white p-5 rounded border shadow-sm">
-                        <h4 class="font-bold text-slate-700 mb-4">Stok vs Kapasitas</h4>
-                        <canvas id="stockLevelChart" class="h-[250px]"></canvas>
-                    </div>
+        <section id="dashboard-section">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-5 rounded border shadow-sm">
+                    <h4 class="font-bold text-slate-700 mb-4 text-xs uppercase">Tren Pengeluaran</h4>
+                    <div class="h-[250px]"><canvas id="dailyUsageChart"></canvas></div>
                 </div>
-            </section>
-        </main>
-    </div>
+                <div class="bg-white p-5 rounded border shadow-sm">
+                    <h4 class="font-bold text-slate-700 mb-4 text-xs uppercase">Stok vs Maks</h4>
+                    <div class="h-[250px]"><canvas id="stockLevelChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
 
-    <script>
-        // Data Dinamis (Simulasi Data dari Database)
-        const inventoryData = [
-            { nama: 'Cat A', stok: 65, max: 100, keluar: 12 },
-            { nama: 'Chem B', stok: 40, max: 100, keluar: 19 },
-            { nama: 'Thinner', stok: 80, max: 100, keluar: 3 }
-        ];
+<script>
+    // Data Database (Bisa diganti dengan hasil fetch)
+    const dbData = {
+        weekly: { labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], values: [10, 15, 8, 20, 5, 2, 7] },
+        monthly: { labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'], values: [40, 65, 30, 80] }
+    };
 
-        let dailyChart, stockChart;
+    let dailyChart, stockChart;
 
-        function initCharts(data) {
-            if (dailyChart) dailyChart.destroy();
-            if (stockChart) stockChart.destroy();
+    function updateCharts() {
+        const filter = document.getElementById('timeFilter').value;
+        const data = dbData[filter];
+        
+        if (dailyChart) dailyChart.destroy();
+        if (stockChart) stockChart.destroy();
 
-            const labels = data.map(item => item.nama);
-            
-            // Grafik Line
-            dailyChart = new Chart(document.getElementById('dailyUsageChart').getContext('2d'), {
-                type: 'line',
-                data: { labels: labels, datasets: [{ label: 'Qty Keluar', data: data.map(i => i.keluar), borderColor: '#3b82f6', fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }] },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
+        // Line Chart
+        dailyChart = new Chart(document.getElementById('dailyUsageChart'), {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{ 
+                    label: 'Satuan (Liter)', 
+                    data: data.values, 
+                    borderColor: '#3b82f6', 
+                    tension: 0.3,
+                    fill: true,
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
+                }]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { title: { display: true, text: 'Liter/Kg' } } }
+            }
+        });
 
-            // Grafik Bar
-            stockChart = new Chart(document.getElementById('stockLevelChart').getContext('2d'), {
-                type: 'bar',
-                data: { 
-                    labels: labels, 
-                    datasets: [
-                        { label: 'Stok Saat Ini', data: data.map(i => i.stok), backgroundColor: '#3b82f6' },
-                        { label: 'Kapasitas Maks', data: data.map(i => i.max), backgroundColor: '#e2e8f0' }
-                    ] 
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
+        // Bar Chart
+        stockChart = new Chart(document.getElementById('stockLevelChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Cat A', 'Chem B', 'Thinner'],
+                datasets: [{ label: 'Stok (Unit)', data: [65, 40, 80], backgroundColor: '#3b82f6' }]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false,
+                scales: { y: { title: { display: true, text: 'Jumlah Stok' } } }
+            }
+        });
+    }
 
-        function showSection(id) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-            document.getElementById(id + '-section').classList.remove('hidden');
-            if(id === 'dashboard') initCharts(inventoryData);
-        }
-
-        lucide.createIcons();
-        window.onload = () => initCharts(inventoryData);
-    </script>
+    // Inisialisasi
+    window.onload = updateCharts;
+    lucide.createIcons();
+</script>
 </body>
 </html>
