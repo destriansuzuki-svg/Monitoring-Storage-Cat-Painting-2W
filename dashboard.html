@@ -3,97 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Inventory Cat & Chemical</title>
+    <title>Dashboard Inventory Gudang</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-[#f8fafc]">
+<body class="bg-[#f8fafc] text-slate-800">
 
 <div class="flex min-h-screen">
-    <aside class="fixed inset-y-0 left-0 z-40 w-56 bg-[#0f172a] text-white">
-        <div class="p-5 border-b border-slate-800 font-bold uppercase tracking-widest text-sm">Warehouse</div>
-        <nav class="p-3">
-            <button onclick="showSection('dashboard')" class="w-full text-left p-3 rounded bg-blue-600">Dashboard</button>
+    <aside class="w-56 bg-[#0f172a] text-slate-400 fixed inset-y-0 left-0 p-5">
+        <h2 class="text-white font-bold text-lg mb-8 uppercase tracking-widest">Inventory</h2>
+        <nav class="space-y-4">
+            <button class="w-full text-left text-white bg-blue-600 p-2 rounded">Dashboard</button>
         </nav>
     </aside>
 
-    <main class="flex-1 md:ml-56 p-8">
-        <header class="mb-8 border-b pb-5 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-slate-800">Dashboard Monitoring</h1>
-            <select id="timeFilter" onchange="updateCharts()" class="bg-white border p-2 rounded text-sm shadow-sm">
-                <option value="weekly">Mingguan</option>
-                <option value="monthly">Bulanan</option>
-            </select>
+    <main class="flex-1 ml-56 p-8">
+        <header class="flex justify-between items-center mb-8">
+            <h1 class="text-2xl font-bold">Dashboard Monitoring</h1>
         </header>
 
-        <section id="dashboard-section">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white p-5 rounded border shadow-sm">
-                    <h4 class="font-bold text-slate-700 mb-4 text-xs uppercase">Tren Pengeluaran</h4>
-                    <div class="h-[250px]"><canvas id="dailyUsageChart"></canvas></div>
-                </div>
-                <div class="bg-white p-5 rounded border shadow-sm">
-                    <h4 class="font-bold text-slate-700 mb-4 text-xs uppercase">Stok vs Maks</h4>
-                    <div class="h-[250px]"><canvas id="stockLevelChart"></canvas></div>
-                </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded border shadow-sm">
+                <p class="text-xs uppercase text-slate-400 font-bold">Total Stok</p>
+                <h2 class="text-3xl font-bold mt-2">1,240 <span class="text-sm font-normal text-slate-500">Unit</span></h2>
             </div>
-        </section>
+            <div class="bg-white p-6 rounded border shadow-sm border-l-4 border-l-red-500">
+                <p class="text-xs uppercase text-red-500 font-bold">Mendekati Expired</p>
+                <h2 class="text-3xl font-bold mt-2 text-red-600">12 <span class="text-sm font-normal text-slate-500">Item</span></h2>
+            </div>
+            <div class="bg-white p-6 rounded border shadow-sm">
+                <p class="text-xs uppercase text-slate-400 font-bold">Terakhir Diambil</p>
+                <h2 class="text-lg font-semibold mt-2">Cat Primer (10:30 WIB)</h2>
+            </div>
+        </div>
+
+        <div class="space-y-8">
+            <div class="bg-white p-6 rounded border shadow-sm">
+                <h4 class="font-bold text-slate-700 mb-6 uppercase text-sm">Tren Pengambilan Harian</h4>
+                <div class="h-[300px] w-full"><canvas id="dailyUsageChart"></canvas></div>
+            </div>
+
+            <div class="bg-white p-6 rounded border shadow-sm">
+                <h4 class="font-bold text-slate-700 mb-6 uppercase text-sm">Perbandingan Stok vs Kapasitas Maksimal</h4>
+                <div class="h-[350px] w-full"><canvas id="stockLevelChart"></canvas></div>
+            </div>
+        </div>
     </main>
 </div>
 
 <script>
-    // Data Database (Bisa diganti dengan hasil fetch)
-    const dbData = {
-        weekly: { labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'], values: [10, 15, 8, 20, 5, 2, 7] },
-        monthly: { labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'], values: [40, 65, 30, 80] }
-    };
+    // Data terpusat
+    const labels = ['Cat A', 'Chem B', 'Thinner', 'Solvent', 'Epoxy'];
+    const currentStock = [80, 45, 90, 30, 60];
+    const maxCapacity = [100, 100, 100, 50, 80];
 
-    let dailyChart, stockChart;
+    // Chart Inisialisasi
+    new Chart(document.getElementById('dailyUsageChart'), {
+        type: 'line',
+        data: {
+            labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+            datasets: [{ label: 'Pengeluaran (Liter)', data: [12, 19, 3, 5, 2, 3, 7], borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
 
-    function updateCharts() {
-        const filter = document.getElementById('timeFilter').value;
-        const data = dbData[filter];
-        
-        if (dailyChart) dailyChart.destroy();
-        if (stockChart) stockChart.destroy();
+    // Chart Stok vs Maks (Satu diagram batang)
+    new Chart(document.getElementById('stockLevelChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                { label: 'Stok Saat Ini', data: currentStock, backgroundColor: '#3b82f6' },
+                { label: 'Kapasitas Maksimal', data: maxCapacity, backgroundColor: '#e2e8f0' }
+            ]
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            scales: { y: { beginAtZero: true } }
+        }
+    });
 
-        // Line Chart
-        dailyChart = new Chart(document.getElementById('dailyUsageChart'), {
-            type: 'line',
-            data: {
-                labels: data.labels,
-                datasets: [{ 
-                    label: 'Satuan (Liter)', 
-                    data: data.values, 
-                    borderColor: '#3b82f6', 
-                    tension: 0.3,
-                    fill: true,
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)'
-                }]
-            },
-            options: { 
-                responsive: true, maintainAspectRatio: false,
-                scales: { y: { title: { display: true, text: 'Liter/Kg' } } }
-            }
-        });
-
-        // Bar Chart
-        stockChart = new Chart(document.getElementById('stockLevelChart'), {
-            type: 'bar',
-            data: {
-                labels: ['Cat A', 'Chem B', 'Thinner'],
-                datasets: [{ label: 'Stok (Unit)', data: [65, 40, 80], backgroundColor: '#3b82f6' }]
-            },
-            options: { 
-                responsive: true, maintainAspectRatio: false,
-                scales: { y: { title: { display: true, text: 'Jumlah Stok' } } }
-            }
-        });
-    }
-
-    // Inisialisasi
-    window.onload = updateCharts;
     lucide.createIcons();
 </script>
 </body>
