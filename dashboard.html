@@ -6,128 +6,83 @@
     <title>Sistem Inventory Cat & Chemical</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; letter-spacing: -0.01em; }
+        body { font-family: 'Inter', sans-serif; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        section { transition: opacity 0.2s ease-in-out; }
+        .hidden { display: none; }
     </style>
 </head>
 <body class="bg-[#f8fafc]">
 
-    <div class="md:hidden bg-slate-900 text-white p-3 flex justify-between items-center sticky top-0 z-50">
-        <div class="flex items-center gap-2">
-            <i data-lucide="package" class="w-5 h-5 text-blue-400"></i>
-            <span class="font-bold text-xs tracking-tight uppercase">INV System</span>
-        </div>
-        <button id="mobileMenuBtn" class="p-1.5 hover:bg-slate-800 rounded">
-            <i data-lucide="menu" class="w-5 h-5"></i>
-        </button>
-    </div>
-
     <div class="flex min-h-screen">
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-56 bg-[#0f172a] text-slate-400 transform -translate-x-full md:translate-x-0 transition-transform duration-200 flex flex-col border-r border-slate-800">
-            <div class="p-5 border-b border-slate-800/50 flex justify-between items-center">
-                <div class="flex items-center gap-2">
-                    <div class="bg-blue-600 p-1.5 rounded shadow-lg text-white">
-                        <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                    </div>
-                    <span class="font-bold text-white text-sm uppercase">Warehouse</span>
-                </div>
-                <button class="md:hidden" id="closeSidebar"><i data-lucide="x" class="w-4 h-4"></i></button>
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-56 bg-[#0f172a] text-slate-400">
+            <div class="p-5 border-b border-slate-800">
+                <span class="font-bold text-white uppercase">Warehouse</span>
             </div>
-            
-            <nav class="flex-grow p-3 space-y-0.5 overflow-y-auto no-scrollbar">
-                <p class="px-3 py-2 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Menu Utama</p>
-                <button onclick="showSection('dashboard')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 text-white bg-blue-600 active-link">
+            <nav class="p-3 space-y-1">
+                <button onclick="showSection('dashboard')" class="nav-btn w-full flex items-center gap-2 py-2 px-3 rounded hover:bg-slate-800 text-white bg-blue-600">
                     <i data-lucide="pie-chart" class="w-4 h-4"></i> Dashboard
                 </button>
-                <button onclick="showSection('inventory')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 text-slate-400">
-                    <i data-lucide="list-checks" class="w-4 h-4"></i> Histori Transaksi
+                <button onclick="showSection('inventory')" class="nav-btn w-full flex items-center gap-2 py-2 px-3 rounded hover:bg-slate-800">
+                    <i data-lucide="list-checks" class="w-4 h-4"></i> Transaksi
                 </button>
-                <button onclick="showSection('stock')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 text-slate-400">
-                    <i data-lucide="box-select" class="w-4 h-4"></i> Stock Material
-                </button>
-                
-                <div class="pt-4 mt-2 border-t border-slate-800/50">
-                    <p class="px-3 py-2 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Master Data</p>
-                    <button onclick="showSection('master')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 text-slate-400">
-                        <i data-lucide="database" class="w-4 h-4"></i> Database
-                    </button>
-                    <button onclick="showSection('update')" class="nav-btn w-full flex items-center gap-2.5 py-2 px-3 rounded text-[12px] font-medium hover:bg-slate-800 text-slate-400">
-                        <i data-lucide="file-plus" class="w-4 h-4"></i> Input In/Out
-                    </button>
-                </div>
             </nav>
         </aside>
 
-        <div class="flex-1 md:ml-56 transition-all duration-300">
-            <main class="p-4 md:p-8 max-w-7xl mx-auto">
-                <header class="flex justify-between items-center mb-8 pb-5 border-b border-slate-200">
-                    <div>
-                        <h1 id="sectionTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Ringkasan Gudang</h1>
-                    </div>
-                </header>
+        <main class="flex-1 md:ml-56 p-8">
+            <header class="mb-8 border-b pb-5">
+                <h1 id="sectionTitle" class="text-2xl font-bold text-slate-800">Ringkasan Gudang</h1>
+            </header>
 
-                <section id="dashboard-section" class="animate-in fade-in">
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
-                        <div class="bg-white p-5 rounded border shadow-sm">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Total SKU</p>
-                            <h3 id="totalItem" class="text-2xl font-bold text-slate-800">--</h3>
-                        </div>
-                        <div class="bg-white p-5 rounded border shadow-sm">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Low Stock</p>
-                            <h3 id="lowStock" class="text-2xl font-bold text-slate-800">--</h3>
-                        </div>
-                        <div class="bg-white p-5 rounded border shadow-sm">
-                            <p class="text-[10px] font-bold text-slate-400 uppercase">Chemical</p>
-                            <h3 id="chemCount" class="text-2xl font-bold text-slate-800">--</h3>
-                        </div>
+            <section id="dashboard-section" class="space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-5 rounded border shadow-sm">
+                        <h4 class="font-bold text-slate-700 mb-4">Tren Pengambilan</h4>
+                        <canvas id="dailyUsageChart" class="h-[250px]"></canvas>
                     </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
-                        <div class="bg-white p-5 rounded border shadow-sm">
-                            <h4 class="font-bold text-[11px] text-slate-700 uppercase mb-4">Tren Pengambilan Harian</h4>
-                            <div class="h-[250px]"><canvas id="dailyUsageChart"></canvas></div>
-                        </div>
-                        <div class="bg-white p-5 rounded border shadow-sm">
-                            <h4 class="font-bold text-[11px] text-slate-700 uppercase mb-4">Stok vs Kapasitas Maks</h4>
-                            <div class="h-[250px]"><canvas id="stockLevelChart"></canvas></div>
-                        </div>
+                    <div class="bg-white p-5 rounded border shadow-sm">
+                        <h4 class="font-bold text-slate-700 mb-4">Stok vs Kapasitas</h4>
+                        <canvas id="stockLevelChart" class="h-[250px]"></canvas>
                     </div>
-                </section>
-
-                <section id="inventory-section" class="hidden"><div id="inventoryContainer"></div></section>
-                <section id="stock-section" class="hidden"><div id="stockSummaryContainer"></div></section>
-                <section id="master-section" class="hidden"><div id="masterContainer"></div></section>
-                <section id="update-section" class="hidden"><div id="formPlaceholder"></div></section>
-            </main>
-        </div>
+                </div>
+            </section>
+        </main>
     </div>
 
     <script>
-        lucide.createIcons();
+        // Data Dinamis (Simulasi Data dari Database)
+        const inventoryData = [
+            { nama: 'Cat A', stok: 65, max: 100, keluar: 12 },
+            { nama: 'Chem B', stok: 40, max: 100, keluar: 19 },
+            { nama: 'Thinner', stok: 80, max: 100, keluar: 3 }
+        ];
 
-        function initCharts() {
-            new Chart(document.getElementById('dailyUsageChart'), {
+        let dailyChart, stockChart;
+
+        function initCharts(data) {
+            if (dailyChart) dailyChart.destroy();
+            if (stockChart) stockChart.destroy();
+
+            const labels = data.map(item => item.nama);
+            
+            // Grafik Line
+            dailyChart = new Chart(document.getElementById('dailyUsageChart').getContext('2d'), {
                 type: 'line',
-                data: {
-                    labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
-                    datasets: [{ label: 'Pengambilan', data: [10, 15, 8, 20, 5, 2, 7], borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }]
-                },
+                data: { labels: labels, datasets: [{ label: 'Qty Keluar', data: data.map(i => i.keluar), borderColor: '#3b82f6', fill: true, backgroundColor: 'rgba(59, 130, 246, 0.1)' }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            new Chart(document.getElementById('stockLevelChart'), {
+            // Grafik Bar
+            stockChart = new Chart(document.getElementById('stockLevelChart').getContext('2d'), {
                 type: 'bar',
-                data: {
-                    labels: ['Cat A', 'Chem B', 'Thinner'],
+                data: { 
+                    labels: labels, 
                     datasets: [
-                        { label: 'Stok', data: [60, 30, 80], backgroundColor: '#3b82f6' },
-                        { label: 'Max', data: [100, 100, 100], backgroundColor: '#e2e8f0' }
-                    ]
+                        { label: 'Stok Saat Ini', data: data.map(i => i.stok), backgroundColor: '#3b82f6' },
+                        { label: 'Kapasitas Maks', data: data.map(i => i.max), backgroundColor: '#e2e8f0' }
+                    ] 
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
@@ -136,12 +91,11 @@
         function showSection(id) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
             document.getElementById(id + '-section').classList.remove('hidden');
-            // Logika navigasi lainnya...
+            if(id === 'dashboard') initCharts(inventoryData);
         }
 
-        window.onload = () => {
-            initCharts();
-        };
+        lucide.createIcons();
+        window.onload = () => initCharts(inventoryData);
     </script>
 </body>
 </html>
