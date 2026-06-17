@@ -1,30 +1,33 @@
 /**
- * master.js - Database Cat & Chemical (Full Width & No Overlap)
+ * master.js - Database Cat & Chemical (Full Width & No Overlap Fixed)
  */
 
 function renderManageMaster(data) {
     const container = document.getElementById('masterContainer');
     if (!container) return;
 
+    // FIX: Reset class grid bawaan HTML agar tidak mengompresi tabel menjadi 1/4 lebar
+    container.className = "w-full block";
+
     // Paksa container dan tabel menggunakan lebar penuh (w-full)
     container.innerHTML = `
         <div class="w-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
             <div class="hidden md:block">
                 <table class="w-full border-collapse" style="min-width: 1000px;">
-                    <thead class="bg-slate-100 text-slate-700 font-bold uppercase text-[10px] border-b border-slate-200">
+                    <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-200/80">
                         <tr>
-                            <th class="p-3 text-center" style="width: 50px;">NO</th>
-                            <th class="p-3 text-left" style="width: 120px;">ENTRY DATE</th>
-                            <th class="p-3 text-left" style="width: 150px;">PART NUMBER</th>
+                            <th class="p-3 text-center text-slate-700 font-bold" style="width: 60px;">NO</th>
+                            <th class="p-3 text-left" style="width: 140px;">ENTRY DATE</th>
+                            <th class="p-3 text-left" style="width: 160px;">PART NUMBER</th>
                             <th class="p-3 text-left">NAMA PRODUK</th>
-                            <th class="p-3 text-left" style="width: 150px;">SUPPLIER</th>
-                            <th class="p-3 text-center" style="width: 100px;">SATUAN</th>
+                            <th class="p-3 text-left" style="width: 180px;">SUPPLIER</th>
+                            <th class="p-3 text-center" style="width: 110px;">SATUAN</th>
                             <th class="p-3 text-center" style="width: 120px;">LOKASI</th>
                             <th class="p-3 text-center" style="width: 80px;">AKSI</th>
                         </tr>
                     </thead>
                     <tbody id="masterTableBody" class="text-slate-600 divide-y divide-slate-100 bg-white text-[11px]">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
 
@@ -46,18 +49,18 @@ function renderMasterRows(data) {
         return;
     }
 
-    // Render Tabel Desktop
+    // Render Tabel Desktop (Tanpa border-r vertikal kaku agar tampilan clean & luas)
     tbody.innerHTML = data.map((item, index) => `
-        <tr class="hover:bg-blue-50/50 transition-colors">
-            <td class="p-3 text-center font-bold border-r">${index + 1}</td>
-            <td class="p-3 border-r">${item.entryDate || '-'}</td>
-            <td class="p-3 font-bold text-blue-600 font-mono border-r">${item.partNumber || '-'}</td>
-            <td class="p-3 border-r font-medium">${item.namaProduk || '-'}</td>
-            <td class="p-3 border-r">${item.supplier || '-'}</td>
-            <td class="p-3 text-center border-r">${item.satuan || '0'} L</td>
-            <td class="p-3 text-center font-bold text-slate-500 border-r uppercase">${item.lokasi || '-'}</td>
+        <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
+            <td class="p-3 text-center font-bold text-slate-400 bg-slate-50/50">${index + 1}</td>
+            <td class="p-3">${item.entryDate || '-'}</td>
+            <td class="p-3 font-bold text-blue-600 font-mono tracking-tight">${item.partNumber || '-'}</td>
+            <td class="p-3 font-medium text-slate-800">${item.namaProduk || '-'}</td>
+            <td class="p-3 text-slate-500">${item.supplier || '-'}</td>
+            <td class="p-3 text-center font-semibold">${item.satuan || '0'} L</td>
+            <td class="p-3 text-center"><span class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-[10px] uppercase">${item.lokasi || '-'}</span></td>
             <td class="p-3 text-center">
-                <button onclick="handleDeleteMaster('${item.partNumber}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg">
+                <button onclick="handleDeleteMaster('${item.partNumber}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
             </td>
@@ -81,7 +84,8 @@ function renderMasterRows(data) {
 
     if(window.lucide) lucide.createIcons();
 }
-// 4. KONEKSI KE SPREADSHEET (APPS SCRIPT)
+
+// KONEKSI KE SPREADSHEET (APPS SCRIPT)
 function openModalAdd() {
     Swal.fire({
         title: 'Tambah Material',
