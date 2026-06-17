@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
@@ -88,17 +87,22 @@
             </div>
         </aside>
 
-        <div class="flex-1 md:ml-56 transition-all duration-300">
+        <div id="mainContent" class="flex-1 md:ml-56 transition-all duration-300">
             <main class="p-4 md:p-8 max-w-7xl mx-auto">
                 
                 <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-slate-200 pb-5">
-                    <div>
-                        <nav class="flex text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 gap-1.5">
-                            <span>Warehouse</span>
-                            <span>/</span>
-                            <span class="text-blue-600" id="breadcrumb">Dashboard</span>
-                        </nav>
-                        <h1 id="sectionTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Ringkasan Gudang</h1>
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleSidebar()" id="desktopMenuBtn" class="hidden md:flex p-2 hover:bg-slate-200 text-slate-600 rounded transition-all" title="Toggle Sidebar">
+                            <i data-lucide="menu" class="w-5 h-5"></i>
+                        </button>
+                        <div>
+                            <nav class="flex text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 gap-1.5">
+                                <span>Warehouse</span>
+                                <span>/</span>
+                                <span class="text-blue-600" id="breadcrumb">Dashboard</span>
+                            </nav>
+                            <h1 id="sectionTitle" class="text-2xl font-bold text-slate-800 tracking-tight">Ringkasan Gudang</h1>
+                        </div>
                     </div>
                     <div id="statusBadge" class="bg-white px-3 py-1.5 rounded border border-slate-200 shadow-sm text-[10px] font-bold text-slate-500 uppercase tracking-tighter">
                         SPREADSHEET STATUS: <span id="syncText" class="text-emerald-500">SYNCED</span>
@@ -106,7 +110,6 @@
                 </header>
 
                 <section id="dashboard-section" class="animate-in fade-in duration-300">
-                    <!-- KPI Cards Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
                         <div class="bg-white p-5 rounded border border-slate-200 shadow-sm flex items-center gap-4">
                             <div class="p-3 bg-blue-50 text-blue-600 rounded">
@@ -137,16 +140,13 @@
                         </div>
                     </div>
 
-                    <!-- Modul Chart Visualisasi Data -->
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                        <!-- Grafik Pengambilan (2/3 width) -->
                         <div class="bg-white p-5 rounded border border-slate-200 shadow-sm lg:col-span-2">
                             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
                                 <div>
                                     <h4 class="font-bold text-slate-700 text-xs uppercase tracking-wider flex items-center gap-2">
                                         <i data-lucide="trending-up" class="w-4 h-4 text-blue-500"></i> Tren Pengambilan Material (Liter)
                                     </h4>
-                                    <!-- Identitas Jelas Update Harian Terpilih -->
                                     <p id="chartSubTitle" class="text-[10px] text-orange-600 font-semibold mt-0.5 bg-orange-50 px-2 py-0.5 rounded inline-block">
                                         Memuat status harian...
                                     </p>
@@ -162,7 +162,6 @@
                             </div>
                         </div>
 
-                        <!-- Pie Chart Stock Keseluruhan vs Maksimum (1/3 width) -->
                         <div class="bg-white p-5 rounded border border-slate-200 shadow-sm">
                             <h4 class="font-bold text-slate-700 text-xs uppercase tracking-wider flex items-center gap-2 mb-4">
                                 <i data-lucide="pie-chart" class="w-4 h-4 text-emerald-500"></i> Kapasitas Stok Global
@@ -176,7 +175,6 @@
                         </div>
                     </div>
 
-                    <!-- Log Aktivitas Terakhir -->
                     <div class="bg-white rounded border border-slate-200 shadow-sm overflow-hidden">
                         <div class="bg-slate-50 p-4 border-b border-slate-200">
                             <h4 class="font-bold text-slate-700 text-[11px] uppercase tracking-widest flex items-center gap-2">
@@ -221,7 +219,6 @@
         </div>
     </div>
 
-    <!-- Script Internal Pendukung Integrasi Data -->
     <script src="master.js"></script>
     <script src="inventory.js"></script>
     <script src="stock.js"></script>
@@ -233,6 +230,7 @@
         const sidebar = document.getElementById('sidebar');
         const mobileBtn = document.getElementById('mobileMenuBtn');
         const closeBtn = document.getElementById('closeSidebar');
+        const mainContent = document.getElementById('mainContent');
         let usageChartInstance = null;
         let stockPieChartInstance = null;
 
@@ -249,8 +247,29 @@
             { date: "2026-06-16", type: "Out", itemId: "M002", qty: 110, unit: "Liter", operator: "Ahmad" }
         ];
 
+        // Mobile Sidebar Handlers
         mobileBtn.onclick = () => sidebar.classList.remove('-translate-x-full');
         closeBtn.onclick = () => sidebar.classList.add('-translate-x-full');
+
+        // Toggle Sidebar Function (Desktop & Mobile Unified)
+        function toggleSidebar() {
+            if (window.innerWidth >= 768) {
+                // Atur visibilitas sidebar desktop
+                sidebar.classList.toggle('md:translate-x-0');
+                
+                // Atur pergeseran margin konten utama
+                if (sidebar.classList.contains('md:translate-x-0')) {
+                    mainContent.classList.remove('md:ml-0');
+                    mainContent.classList.add('md:ml-56');
+                } else {
+                    mainContent.classList.remove('md:ml-56');
+                    mainContent.classList.add('md:ml-0');
+                }
+            } else {
+                // Fallback toggle biasa untuk mobile view jika dipicu
+                sidebar.classList.toggle('-translate-x-full');
+            }
+        }
 
         function showSection(id) {
             document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
@@ -277,6 +296,7 @@
             document.getElementById('sectionTitle').innerText = titles[id] || 'Warehouse';
             document.getElementById('breadcrumb').innerText = id.charAt(0).toUpperCase() + id.slice(1);
 
+            // Sembunyikan otomatis jika di mobile view setelah memilih menu
             if (window.innerWidth < 768) sidebar.classList.add('-translate-x-full');
             
             if(id === 'dashboard') processDashboardLogic();
@@ -356,9 +376,6 @@
             lucide.createIcons();
         }
 
-        /**
-         * REVISI: Modifikasi Pemetaan Tanggal 18 Juni 2026 Update Harian pada Grafik
-         */
         function updateUsageChart(filterType) {
             ['weekly', 'monthly', 'yearly'].forEach(type => {
                 const btn = document.getElementById(`btn-${type}`);
@@ -374,26 +391,24 @@
             const subTitleEl = document.getElementById('chartSubTitle');
 
             if(filterType === 'weekly') {
-                // Set Identitas Jelas Tanggal 18 Juni 2026 di Subtitle & Label Axis
                 subTitleEl.innerHTML = `<span class="flex items-center gap-1"><span class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-ping"></span> Live Update: Kamis, 18 Juni 2026 Terintegrasi</span>`;
                 subTitleEl.className = "text-[10px] text-orange-600 font-bold mt-0.5 bg-orange-50 px-2 py-0.5 rounded inline-block border border-orange-200";
 
                 labels = ['Sen (15/06)', 'Sel (16/06)', 'Rab (17/06)', 'Kam (18/06) *UPDATE HARIAN*', 'Jum (19/06)', 'Sab (20/06)', 'Min (21/06)'];
-                datasetsData = [45, 110, 25, 95, 0, 0, 0]; // 95 Liter data input pada tanggal 18 Juni
+                datasetsData = [45, 110, 25, 95, 0, 0, 0];
                 
-                // Set warna kontras Oranye khusus untuk membedakan data "18 Juni Update Harian"
                 backgroundColors = [
                     'rgba(37, 99, 235, 0.4)', 
                     'rgba(37, 99, 235, 0.4)', 
                     'rgba(37, 99, 235, 0.4)', 
-                    'rgba(249, 115, 22, 1)', // Orange solid untuk tanggal 18 Juni
+                    'rgba(249, 115, 22, 1)', 
                     'rgba(226, 232, 240, 0.5)', 
                     'rgba(226, 232, 240, 0.5)', 
                     'rgba(226, 232, 240, 0.5)'
                 ];
                 borderColors = [
                     'rgb(37, 99, 235)', 'rgb(37, 99, 235)', 'rgb(37, 99, 235)',
-                    'rgb(234, 88, 12)', // Orange border
+                    'rgb(234, 88, 12)', 
                     'rgb(203, 213, 225)', 'rgb(203, 213, 225)', 'rgb(203, 213, 225)'
                 ];
             } else if(filterType === 'monthly') {
