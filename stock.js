@@ -18,50 +18,57 @@ function renderStockSummary(data) {
         window.rawStockData = data;
     }
 
-    // 1. STRUKTUR UTAMA: Control Bar Sejajar (Inline Grid) & Container Tabel
+    // 1. STRUKTUR UTAMA: Baris Kontrol Menggunakan Flexbox Agar Sejajar dan Responsif Mengikuti Sisa Lebar Layar
     section.innerHTML = `
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 items-center">
-            <div class="lg:col-span-3 relative">
-                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                <input type="text" id="searchStock" onkeyup="filterStockRows()" placeholder="Cari Part No / Nama..." class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium">
-            </div>
-            <div class="lg:col-span-2">
-                <select id="filterTanggal" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-600">
-                    <option value="">-- Pilih Tanggal --</option>
-                    ${Array.from({length: 31}, (_, i) => `<option value="${String(i+1).padStart(2, '0')}">${i+1}</option>`).join('')}
-                </select>
-            </div>
-            <div class="lg:col-span-2">
-                <select id="filterBulan" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-600">
-                    <option value="">-- Pilih Bulan --</option>
-                    <option value="01">Januari</option><option value="02">Februari</option>
-                    <option value="03">Maret</option><option value="04">April</option>
-                    <option value="05">Mei</option><option value="06">Juni</option>
-                    <option value="07">Juli</option><option value="08">Agustus</option>
-                    <option value="09">September</option><option value="10">Oktober</option>
-                    <option value="11">November</option><option value="12">Desember</option>
-                </select>
-            </div>
-            <div class="lg:col-span-1">
-                <select id="filterTahun" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-600">
-                    <option value="">-- Pilih Tahun --</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                    <option value="2027">2027</option>
-                </select>
+        <div class="bg-white p-3 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row flex-wrap items-center justify-between gap-2 w-full">
+            
+            <div class="flex flex-wrap items-center gap-2 flex-1 min-w-[300px] w-full md:w-auto">
+                
+                <div class="relative flex-1 min-w-[160px] max-w-xs">
+                    <i data-lucide="search" class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
+                    <input type="text" id="searchStock" onkeyup="filterStockRows()" placeholder="Cari Part No / Nama..." class="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 pl-8 pr-2 text-[11px] focus:ring-1 focus:ring-blue-500 outline-none font-medium text-slate-700">
+                </div>
+
+                <div class="w-[110px] shrink-0">
+                    <select id="filterTanggal" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-[11px] focus:ring-1 focus:ring-blue-500 outline-none font-medium text-slate-600 cursor-pointer">
+                        <option value="">Tanggal</option>
+                        ${Array.from({length: 31}, (_, i) => `<option value="${String(i+1).padStart(2, '0')}">${i+1}</option>`).join('')}
+                    </select>
+                </div>
+
+                <div class="w-[115px] shrink-0">
+                    <select id="filterBulan" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-[11px] focus:ring-1 focus:ring-blue-500 outline-none font-medium text-slate-600 cursor-pointer">
+                        <option value="">Bulan</option>
+                        <option value="01">Januari</option><option value="02">Februari</option>
+                        <option value="03">Maret</option><option value="04">April</option>
+                        <option value="05">Mei</option><option value="06">Juni</option>
+                        <option value="07">Juli</option><option value="08">Agustus</option>
+                        <option value="09">September</option><option value="10">Oktober</option>
+                        <option value="11">November</option><option value="12">Desember</option>
+                    </select>
+                </div>
+
+                <div class="w-[90px] shrink-0">
+                    <select id="filterTahun" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg py-1.5 px-2 text-[11px] focus:ring-1 focus:ring-blue-500 outline-none font-medium text-slate-600 cursor-pointer">
+                        <option value="">Tahun</option>
+                        <option value="2025">2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="lg:col-span-4 flex items-center justify-end gap-2 w-full mt-1 sm:mt-0">
-                <button onclick="exportStockToExcel()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-700 transition-all shadow-sm whitespace-nowrap">
-                    <i data-lucide="file-output" class="w-4 h-4"></i> Export Excel
+            <div class="flex items-center gap-1.5 shrink-0 w-full md:w-auto justify-end mt-2 md:mt-0 border-t md:border-t-0 pt-2 md:pt-0 border-slate-100">
+                <button onclick="exportStockToExcel()" class="bg-emerald-600 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1 hover:bg-emerald-700 transition-all shadow-sm whitespace-nowrap">
+                    <i data-lucide="file-output" class="w-3.5 h-3.5"></i> Export Excel
                 </button>
-                <button onclick="openModalAddStock()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Item
+                <button onclick="openModalAddStock()" class="bg-blue-600 text-white px-2.5 py-1.5 rounded-lg text-[11px] font-bold flex items-center gap-1 hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap">
+                    <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> Tambah Item
                 </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden w-full">
             <div class="hidden lg:block overflow-x-auto">
                 <table class="w-full text-left border-collapse table-fixed" style="min-width: 1080px;">
                     <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-200/80">
@@ -93,7 +100,7 @@ function renderStockSummary(data) {
     displayStockRows(window.rawStockData);
 }
 
-// 2. FUNGSI MERENDER ISI BARIS DATA SECARA DINAMIS
+// 2. FUNGSI MERENDER ISI BARIS DATA SECARA DINAMIS (Ramping & Mencegah Layout Pecah)
 function displayStockRows(items) {
     const tbody = document.getElementById('stockTableBody');
     const cards = document.getElementById('stockMobileCards');
@@ -115,7 +122,7 @@ function displayStockRows(items) {
         const keluar = parseFloat(item.totalKeluar) || 0;
         const akhir = awal + masuk - keluar;
 
-        // Render baris versi Desktop (Ramping & Mencegah Pecah Layout)
+        // Render baris versi Desktop
         tableHtml += `
             <tr class="hover:bg-slate-50/70 transition-all">
                 <td class="px-2 py-2.5 text-center font-bold text-slate-400 bg-slate-50/30">${index + 1}</td>
@@ -357,14 +364,13 @@ function handleDeleteStock(partNumber) {
     });
 }
 
-// 7. UTILITY: High-Fidelity Excel Export Engine (Generates formatted Spreadsheet Layout directly)
+// 7. UTILITY EXPORT: HTML/XML Spreadsheet Engine (Otomatis memunculkan Garis Grid & Warna Tabel di Excel)
 function exportStockToExcel() {
     if(!window.rawStockData || window.rawStockData.length === 0) {
         Swal.fire('Perhatian', 'Tidak ada baris data material untuk di-export.', 'info');
         return;
     }
 
-    // Template khusus XML/HTML agar terbaca otomatis sebagai tabel berestetika tinggi oleh Excel
     let uri = 'data:application/vnd.ms-excel;charset=utf-8,';
     let template = `
         <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
@@ -428,7 +434,7 @@ function exportStockToExcel() {
 
     template += `</tbody></table></body></html>`;
 
-    // Trigger download blob dokumen
+    // Trigger download blob dokumen excel
     const blob = new Blob([template], { type: 'application/vnd.ms-excel' });
     const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
