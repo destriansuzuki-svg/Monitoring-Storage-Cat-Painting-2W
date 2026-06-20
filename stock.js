@@ -18,46 +18,44 @@ function renderStockSummary(data) {
         window.rawStockData = data;
     }
 
-    // 1. STRUKTUR UTAMA: Control Bar (Search, Filter, Export, Tambah) & Container Tabel
+    // 1. STRUKTUR UTAMA: Control Bar Sejajar (Inline Grid) & Container Tabel
     section.innerHTML = `
-        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col xl:flex-row gap-3 justify-between items-stretch xl:items-center">
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 flex-grow max-w-5xl">
-                <div class="relative">
-                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
-                    <input type="text" id="searchStock" onkeyup="filterStockRows()" placeholder="Cari Part No / Nama..." class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium">
-                </div>
-                <div>
-                    <select id="filterTanggal" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-600">
-                        <option value="">-- Pilih Tanggal --</option>
-                        ${Array.from({length: 31}, (_, i) => `<option value="${String(i+1).padStart(2, '0')}">${i+1}</option>`).join('')}
-                    </select>
-                </div>
-                <div>
-                    <select id="filterBulan" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-600">
-                        <option value="">-- Pilih Bulan --</option>
-                        <option value="01">Januari</option><option value="02">Februari</option>
-                        <option value="03">Maret</option><option value="04">April</option>
-                        <option value="05">Mei</option><option value="06">Juni</option>
-                        <option value="07">Juli</option><option value="08">Agustus</option>
-                        <option value="09">September</option><option value="10">Oktober</option>
-                        <option value="11">November</option><option value="12">Desember</option>
-                    </select>
-                </div>
-                <div>
-                    <select id="filterTahun" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-600">
-                        <option value="">-- Pilih Tahun --</option>
-                        <option value="2025">2025</option>
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                    </select>
-                </div>
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2 items-center">
+            <div class="lg:col-span-3 relative">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                <input type="text" id="searchStock" onkeyup="filterStockRows()" placeholder="Cari Part No / Nama..." class="w-full bg-slate-50 border border-slate-200 rounded-lg py-2 pl-9 pr-3 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium">
+            </div>
+            <div class="lg:col-span-2">
+                <select id="filterTanggal" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-600">
+                    <option value="">-- Pilih Tanggal --</option>
+                    ${Array.from({length: 31}, (_, i) => `<option value="${String(i+1).padStart(2, '0')}">${i+1}</option>`).join('')}
+                </select>
+            </div>
+            <div class="lg:col-span-2">
+                <select id="filterBulan" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-600">
+                    <option value="">-- Pilih Bulan --</option>
+                    <option value="01">Januari</option><option value="02">Februari</option>
+                    <option value="03">Maret</option><option value="04">April</option>
+                    <option value="05">Mei</option><option value="06">Juni</option>
+                    <option value="07">Juli</option><option value="08">Agustus</option>
+                    <option value="09">September</option><option value="10">Oktober</option>
+                    <option value="11">November</option><option value="12">Desember</option>
+                </select>
+            </div>
+            <div class="lg:col-span-1">
+                <select id="filterTahun" onchange="filterStockRows()" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs focus:ring-2 focus:ring-blue-500 outline-none font-medium text-slate-600">
+                    <option value="">-- Pilih Tahun --</option>
+                    <option value="2025">2025</option>
+                    <option value="2026">2026</option>
+                    <option value="2027">2027</option>
+                </select>
             </div>
 
-            <div class="flex items-center gap-2 self-end xl:self-auto">
-                <button onclick="exportStockToExcel()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-700 transition-all shadow-sm">
+            <div class="lg:col-span-4 flex items-center justify-end gap-2 w-full mt-1 sm:mt-0">
+                <button onclick="exportStockToExcel()" class="bg-emerald-600 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-emerald-700 transition-all shadow-sm whitespace-nowrap">
                     <i data-lucide="file-output" class="w-4 h-4"></i> Export Excel
                 </button>
-                <button onclick="openModalAddStock()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-700 transition-all shadow-sm">
+                <button onclick="openModalAddStock()" class="bg-blue-600 text-white px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-blue-700 transition-all shadow-sm whitespace-nowrap">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i> Tambah Item
                 </button>
             </div>
@@ -65,19 +63,19 @@ function renderStockSummary(data) {
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="hidden lg:block overflow-x-auto">
-                <table class="w-full text-left border-collapse table-fixed" style="min-width: 1100px;">
+                <table class="w-full text-left border-collapse table-fixed" style="min-width: 1080px;">
                     <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-200/80">
                         <tr>
                             <th class="px-2 py-3 text-center text-slate-700 font-bold" style="width: 40px;">NO</th>
                             <th class="px-2 py-3" style="width: 120px;">PART NUMBER</th>
-                            <th class="px-2 py-3" style="width: 160px;">NAMA PRODUK</th>
+                            <th class="px-2 py-3" style="width: 170px;">NAMA PRODUK</th>
                             <th class="px-2 py-3" style="width: 110px;">SUPPLIER</th>
                             <th class="px-2 py-3" style="width: 90px;">KATEGORI</th>
-                            <th class="px-2 py-3 text-center" style="width: 70px;">LOKASI</th>
+                            <th class="px-2 py-3 text-center" style="width: 75px;">LOKASI</th>
                             <th class="px-2 py-3 text-center" style="width: 80px;">SATUAN</th>
-                            <th class="px-2 py-3 text-center" style="width: 80px;">STOK AWAL</th>
-                            <th class="px-2 py-3 text-center text-emerald-600" style="width: 95px;">MASUK (L)</th>
-                            <th class="px-2 py-3 text-center text-red-500" style="width: 95px;">KELUAR (L)</th>
+                            <th class="px-2 py-3 text-center" style="width: 85px;">STOK AWAL</th>
+                            <th class="px-2 py-3 text-center text-emerald-600" style="width: 90px;">MASUK (L)</th>
+                            <th class="px-2 py-3 text-center text-red-500" style="width: 90px;">KELUAR (L)</th>
                             <th class="px-2 py-3 text-center text-blue-600 font-black bg-slate-50/50" style="width: 95px;">STOK AKHIR</th>
                             <th class="px-2 py-3" style="width: 90px;">PIC</th>
                             <th class="px-2 py-3 text-center" style="width: 75px;">AKSI</th>
@@ -92,7 +90,6 @@ function renderStockSummary(data) {
         </div>
     `;
 
-    // Panggil fungsi pemrosesan baris data setelah struktur siap
     displayStockRows(window.rawStockData);
 }
 
@@ -113,13 +110,12 @@ function displayStockRows(items) {
     let cardsHtml = '';
 
     items.forEach((item, index) => {
-        // Ambil nilai numerik untuk kalkulasi otomatis
         const awal = parseFloat(item.stockAwal) || 0;
         const masuk = parseFloat(item.totalMasuk) || 0;
         const keluar = parseFloat(item.totalKeluar) || 0;
         const akhir = awal + masuk - keluar;
 
-        // Render baris versi Desktop dengan optimasi ruang padding
+        // Render baris versi Desktop (Ramping & Mencegah Pecah Layout)
         tableHtml += `
             <tr class="hover:bg-slate-50/70 transition-all">
                 <td class="px-2 py-2.5 text-center font-bold text-slate-400 bg-slate-50/30">${index + 1}</td>
@@ -128,7 +124,7 @@ function displayStockRows(items) {
                 <td class="px-2 py-2.5 text-slate-500 truncate" title="${item.supplier || '-'}">${item.supplier || '-'}</td>
                 <td class="px-2 py-2.5"><span class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-50 text-blue-700 block text-center truncate">${item.kategori || 'Material'}</span></td>
                 <td class="px-2 py-2.5 text-center font-bold text-slate-500 uppercase truncate">${item.lokasi || '-'}</td>
-                <td class="px-2 py-2.5 text-center font-semibold">${item.satuan || '0'} L</td>
+                <td class="px-2 py-2.5 text-center font-semibold whitespace-nowrap">${item.satuan || '0'} L</td>
                 <td class="px-2 py-2.5 text-center font-medium">${awal}</td>
                 <td class="px-2 py-2.5 text-center text-emerald-600 font-semibold bg-emerald-50/10">+${masuk}</td>
                 <td class="px-2 py-2.5 text-center text-red-500 font-semibold bg-red-50/10">-${keluar}</td>
@@ -211,7 +207,7 @@ function filterStockRows() {
     displayStockRows(filtered);
 }
 
-// 4. AKSES GOOGLE APPS SCRIPT: Tambah Item Baru
+// 4. AKSES GOOGLE APPS SCRIPT: Tambah Item Baru ke Spreadsheet
 function openModalAddStock() {
     Swal.fire({
         title: 'Tambah Material Gudang',
@@ -250,8 +246,6 @@ function openModalAddStock() {
                 lokasi: document.getElementById('st-lokasi').value.trim(),
                 satuan: document.getElementById('st-satuan').value,
                 stockAwal: document.getElementById('st-awal').value || 0,
-                totalMasuk: 0,
-                totalKeluar: 0,
                 pic: document.getElementById('st-pic').value.trim(),
                 entryDate: new Date().toISOString().split('T')[0]
             }
@@ -336,7 +330,7 @@ function openModalEditStock(index) {
     });
 }
 
-// 6. AKSES GOOGLE APPS SCRIPT: Hapus Item
+// 6. AKSES GOOGLE APPS SCRIPT: Hapus Item dari Spreadsheet
 function handleDeleteStock(partNumber) {
     Swal.fire({
         title: 'Hapus Material?',
@@ -363,15 +357,50 @@ function handleDeleteStock(partNumber) {
     });
 }
 
-// 7. UTILITY: Engine Export To CSV
+// 7. UTILITY: High-Fidelity Excel Export Engine (Generates formatted Spreadsheet Layout directly)
 function exportStockToExcel() {
-    if(window.rawStockData.length === 0) {
+    if(!window.rawStockData || window.rawStockData.length === 0) {
         Swal.fire('Perhatian', 'Tidak ada baris data material untuk di-export.', 'info');
         return;
     }
 
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "NO,PART NUMBER,NAMA PRODUK,SUPPLIER,KATEGORI,LOKASI,SATUAN (L),STOCK AWAL,TOTAL MASUK,TOTAL KELUAR,STOCK AKHIR,PIC\n";
+    // Template khusus XML/HTML agar terbaca otomatis sebagai tabel berestetika tinggi oleh Excel
+    let uri = 'data:application/vnd.ms-excel;charset=utf-8,';
+    let template = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head>
+            <style>
+                table { border-collapse: collapse; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 11px; }
+                th { background-color: #f1f5f9; color: #334155; font-weight: bold; border: 1px solid #cbd5e1; text-align: center; padding: 8px; font-size: 11px; text-transform: uppercase; }
+                td { border: 1px solid #e2e8f0; padding: 6px 8px; color: #475569; }
+                .text-center { text-align: center; }
+                .font-mono { font-family: monospace; font-weight: bold; }
+                .bg-masuk { color: #15803d; background-color: #f0fdf4; font-weight: bold; }
+                .bg-keluar { color: #b91c1c; background-color: #fef2f2; font-weight: bold; }
+                .bg-akhir { font-weight: 900; background-color: #f8fafc; color: #0f172a; text-align: center; }
+            </style>
+        </head>
+        <body>
+            <h3>LAPORAN SALDO STOK MATERIAL WAREHOUSE - 2026</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>NO</th>
+                        <th>PART NUMBER</th>
+                        <th>NAMA PRODUK</th>
+                        <th>SUPPLIER</th>
+                        <th>KATEGORI</th>
+                        <th>LOKASI</th>
+                        <th>SATUAN</th>
+                        <th>STOCK AWAL</th>
+                        <th>TOTAL MASUK</th>
+                        <th>TOTAL KELUAR</th>
+                        <th>STOCK AKHIR</th>
+                        <th>PIC</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
 
     window.rawStockData.forEach((item, index) => {
         const awal = parseFloat(item.stockAwal) || 0;
@@ -379,27 +408,32 @@ function exportStockToExcel() {
         const keluar = parseFloat(item.totalKeluar) || 0;
         const akhir = awal + masuk - keluar;
 
-        const row = [
-            index + 1,
-            `"${item.partNumber || ''}"`,
-            `"${item.namaProduk || ''}"`,
-            `"${item.supplier || ''}"`,
-            `"${item.kategori || ''}"`,
-            `"${item.lokasi || ''}"`,
-            item.satuan || 0,
-            awal,
-            masuk,
-            keluar,
-            akhir,
-            `"${item.pic || ''}"`
-        ].join(",");
-        csvContent += row + "\n";
+        template += `
+            <tr>
+                <td class="text-center">${index + 1}</td>
+                <td class="font-mono">${item.partNumber || '-'}</td>
+                <td>${item.namaProduk || '-'}</td>
+                <td>${item.supplier || '-'}</td>
+                <td class="text-center">${item.kategori || 'Material'}</td>
+                <td class="text-center" style="text-transform: uppercase;">${item.lokasi || '-'}</td>
+                <td class="text-center">${item.satuan || 0} L</td>
+                <td class="text-center">${awal}</td>
+                <td class="text-center bg-masuk">+${masuk}</td>
+                <td class="text-center bg-keluar">-${keluar}</td>
+                <td class="bg-akhir">${akhir}</td>
+                <td>${item.pic || '-'}</td>
+            </tr>
+        `;
     });
 
-    const encodedUri = encodeURI(csvContent);
+    template += `</tbody></table></body></html>`;
+
+    // Trigger download blob dokumen
+    const blob = new Blob([template], { type: 'application/vnd.ms-excel' });
+    const downloadUrl = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Stock_Material_Report_2026.csv`);
+    link.href = downloadUrl;
+    link.download = `Stock_Material_Report_2026.xls`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
