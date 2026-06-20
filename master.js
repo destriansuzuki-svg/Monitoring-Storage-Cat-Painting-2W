@@ -1,29 +1,34 @@
 /**
- * master.js - Database Cat & Chemical (Full Width & No Overlap Fixed)
+ * master.js - Database Cat & Chemical (Full Column Integration & Live Sync)
  */
 
 function renderManageMaster(data) {
     const container = document.getElementById('masterContainer');
     if (!container) return;
 
-    // FIX: Reset class grid bawaan HTML agar tidak mengompresi tabel menjadi 1/4 lebar
+    // Reset class grid bawaan HTML agar tidak mengompresi tabel
     container.className = "w-full block";
 
-    // Paksa container dan tabel menggunakan lebar penuh (w-full)
+    // Menyesuaikan Header Tabel agar sama persis dengan lampiran sistem
     container.innerHTML = `
         <div class="w-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
             <div class="hidden md:block">
-                <table class="w-full border-collapse" style="min-width: 1000px;">
+                <table class="w-full border-collapse" style="min-width: 1300px;">
                     <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-200/80">
                         <tr>
-                            <th class="p-3 text-center text-slate-700 font-bold" style="width: 60px;">NO</th>
-                            <th class="p-3 text-left" style="width: 140px;">ENTRY DATE</th>
-                            <th class="p-3 text-left" style="width: 160px;">PART NUMBER</th>
+                            <th class="p-3 text-center text-slate-700 font-bold" style="width: 50px;">NO</th>
+                            <th class="p-3 text-left" style="width: 140px;">PART NUMBER</th>
                             <th class="p-3 text-left">NAMA PRODUK</th>
-                            <th class="p-3 text-left" style="width: 180px;">SUPPLIER</th>
-                            <th class="p-3 text-center" style="width: 110px;">SATUAN</th>
-                            <th class="p-3 text-center" style="width: 120px;">LOKASI</th>
-                            <th class="p-3 text-center" style="width: 80px;">AKSI</th>
+                            <th class="p-3 text-left" style="width: 150px;">SUPPLIER</th>
+                            <th class="p-3 text-center" style="width: 100px;">KATEGORI</th>
+                            <th class="p-3 text-center" style="width: 100px;">LOKASI</th>
+                            <th class="p-3 text-center" style="width: 80px;">SATUAN</th>
+                            <th class="p-3 text-center" style="width: 90px;">STOK AWAL</th>
+                            <th class="p-3 text-center text-green-600" style="width: 90px;">MASUK (L)</th>
+                            <th class="p-3 text-center text-red-600" style="width: 90px;">KELUAR (L)</th>
+                            <th class="p-3 text-center text-blue-600" style="width: 100px;">STOK AKHIR</th>
+                            <th class="p-3 text-center" style="width: 100px;">PIC</th>
+                            <th class="p-3 text-center" style="width: 100px;">AKSI</th>
                         </tr>
                     </thead>
                     <tbody id="masterTableBody" class="text-slate-600 divide-y divide-slate-100 bg-white text-[11px]">
@@ -44,40 +49,62 @@ function renderMasterRows(data) {
     
     if (!data || data.length === 0) {
         const empty = `<div class="p-10 text-center text-slate-400 italic">Data Master Kosong.</div>`;
-        if(tbody) tbody.innerHTML = `<tr><td colspan="8">${empty}</td></tr>`;
+        if(tbody) tbody.innerHTML = `<tr><td colspan="13">${empty}</td></tr>`;
         if(cardContainer) cardContainer.innerHTML = empty;
         return;
     }
 
-    // Render Tabel Desktop (Tanpa border-r vertikal kaku agar tampilan clean & luas)
-    tbody.innerHTML = data.map((item, index) => `
-        <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
-            <td class="p-3 text-center font-bold text-slate-400 bg-slate-50/50">${index + 1}</td>
-            <td class="p-3">${item.entryDate || '-'}</td>
-            <td class="p-3 font-bold text-blue-600 font-mono tracking-tight">${item.partNumber || '-'}</td>
-            <td class="p-3 font-medium text-slate-800">${item.namaProduk || '-'}</td>
-            <td class="p-3 text-slate-500">${item.supplier || '-'}</td>
-            <td class="p-3 text-center font-semibold">${item.satuan || '0'} L</td>
-            <td class="p-3 text-center"><span class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-[10px] uppercase">${item.lokasi || '-'}</span></td>
-            <td class="p-3 text-center">
-                <button onclick="handleDeleteMaster('${item.partNumber}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    // Render Tabel Desktop dengan data dinamis dari Master_Data
+    tbody.innerHTML = data.map((item, index) => {
+        // Logika kalkulasi stok akhir otomatis di sisi client (jika belum dikalkulasi dari server)
+        const stokAwal = Number(item.stokAwal) || 0;
+        const masuk = Number(item.totalMasuk) || 0;
+        const keluar = Number(item.totalKeluar) || 0;
+        const stokAkhir = stokAwal + masuk - keluar;
 
-    // Render Card Mobile
+        return `
+            <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
+                <td class="p-3 text-center font-bold text-slate-400 bg-slate-50/50">${index + 1}</td>
+                <td class="p-3 font-bold text-blue-600 font-mono tracking-tight">${item.partNumber || '-'}</td>
+                <td class="p-3 font-medium text-slate-800">${item.namaProduk || '-'}</td>
+                <td class="p-3 text-slate-500">${item.supplier || '-'}</td>
+                <td class="p-3 text-center">
+                    <span class="bg-blue-50 text-blue-600 font-medium px-2 py-0.5 rounded-full text-[10px]">${item.kategori || 'Material'}</span>
+                </td>
+                <td class="p-3 text-center">
+                    <span class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-[10px] uppercase">${item.lokasi || '-'}</span>
+                </td>
+                <td class="p-3 text-center font-semibold">${item.satuan || '0'} L</td>
+                <td class="p-3 text-center font-medium">${stokAwal}</td>
+                <td class="p-3 text-center font-bold text-green-600">+${masuk}</td>
+                <td class="p-3 text-center font-bold text-red-600">-${keluar}</td>
+                <td class="p-3 text-center font-black text-blue-600 bg-blue-50/30">${stokAkhir}</td>
+                <td class="p-3 text-center text-slate-500">${item.pic || '-'}</td>
+                <td class="p-3 text-center space-x-1 whitespace-nowrap">
+                    <button onclick="openModalEdit(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-all inline-block">
+                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                    </button>
+                    <button onclick="handleDeleteMaster('${item.partNumber}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all inline-block">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    // Render Card Mobile (Disesuaikan agar memuat informasi utama)
     cardContainer.innerHTML = data.map((item, index) => `
         <div class="p-4 bg-white relative">
             <div class="flex justify-between items-start mb-2">
                 <span class="text-blue-600 font-bold text-xs font-mono">${item.partNumber}</span>
                 <span class="text-[9px] font-black text-slate-300">#${index + 1}</span>
             </div>
-            <p class="font-bold text-slate-800 text-xs mb-3">${item.namaProduk}</p>
-            <div class="grid grid-cols-2 gap-2 text-[10px] border-t pt-2">
+            <p class="font-bold text-slate-800 text-xs mb-1">${item.namaProduk}</p>
+            <p class="text-[10px] text-slate-400 mb-2">Supplier: ${item.supplier || '-'}</p>
+            <div class="grid grid-cols-3 gap-2 text-[10px] border-t pt-2 bg-slate-50 p-2 rounded">
                 <div><span class="text-slate-400 font-bold uppercase block text-[8px]">Lokasi</span> ${item.lokasi || '-'}</div>
-                <div class="text-right"><span class="text-slate-400 font-bold uppercase block text-[8px]">Satuan</span> ${item.satuan} L</div>
+                <div><span class="text-slate-400 font-bold uppercase block text-[8px]">Satuan</span> ${item.satuan} L</div>
+                <div class="text-right"><span class="text-blue-500 font-bold uppercase block text-[8px]">Stok Akhir</span> ${ (Number(item.stokAwal)||0) + (Number(item.totalMasuk)||0) - (Number(item.totalKeluar)||0) }</div>
             </div>
         </div>
     `).join('');
@@ -85,43 +112,78 @@ function renderMasterRows(data) {
     if(window.lucide) lucide.createIcons();
 }
 
-// KONEKSI KE SPREADSHEET (APPS SCRIPT)
-function openModalAdd() {
+// FUNGSI MODAL EDIT DATA (SINKRON KE WEB & SPREADSHEET)
+function openModalEdit(item) {
     Swal.fire({
-        title: 'Tambah Material',
+        title: 'Edit Material Master',
         html: `
             <div class="text-left space-y-3 text-xs">
-                <input id="sw-part" class="w-full border p-2 rounded uppercase" placeholder="Part Number">
-                <input id="sw-nama" class="w-full border p-2 rounded" placeholder="Nama Produk">
-                <input id="sw-supp" class="w-full border p-2 rounded" placeholder="Supplier">
+                <div>
+                    <label class="font-bold text-slate-500 block mb-1">PART NUMBER (ID Utama - Tidak Dapat Diubah)</label>
+                    <input id="sw-edit-part" class="w-full border p-2 rounded uppercase bg-slate-100 font-mono font-bold" value="${item.partNumber}" readonly>
+                </div>
+                <div>
+                    <label class="font-bold text-slate-500 block mb-1">NAMA PRODUK</label>
+                    <input id="sw-edit-nama" class="w-full border p-2 rounded" value="${item.namaProduk || ''}" placeholder="Nama Produk">
+                </div>
+                <div>
+                    <label class="font-bold text-slate-500 block mb-1">SUPPLIER</label>
+                    <input id="sw-edit-supp" class="w-full border p-2 rounded" value="${item.supplier || ''}" placeholder="Supplier">
+                </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="sw-satuan" type="number" class="w-full border p-2 rounded" placeholder="Satuan (L)">
-                    <input id="sw-lokasi" class="w-full border p-2 rounded uppercase" placeholder="Lokasi">
+                    <div>
+                        <label class="font-bold text-slate-500 block mb-1">KATEGORI</label>
+                        <input id="sw-edit-kat" class="w-full border p-2 rounded" value="${item.kategori || 'Material'}" placeholder="Kategori">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-500 block mb-1">LOKASI</label>
+                        <input id="sw-edit-lokasi" class="w-full border p-2 rounded uppercase" value="${item.lokasi || ''}" placeholder="Lokasi">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="font-bold text-slate-500 block mb-1">SATUAN (L)</label>
+                        <input id="sw-edit-satuan" type="number" class="w-full border p-2 rounded" value="${item.satuan || '0'}" placeholder="Satuan (L)">
+                    </div>
+                    <div>
+                        <label class="font-bold text-slate-500 block mb-1">STOK AWAL</label>
+                        <input id="sw-edit-stokawal" type="number" class="w-full border p-2 rounded" value="${item.stokAwal || '0'}" placeholder="Stok Awal">
+                    </div>
+                </div>
+                <div>
+                    <label class="font-bold text-slate-500 block mb-1">PIC</label>
+                    <input id="sw-edit-pic" class="w-full border p-2 rounded" value="${item.pic || ''}" placeholder="Nama PIC">
                 </div>
             </div>
         `,
         showCancelButton: true,
-        confirmButtonText: 'Simpan ke Spreadsheet',
+        confirmButtonText: 'Update ke Spreadsheet',
+        cancelButtonText: 'Batal',
         preConfirm: () => {
             return {
-                action: 'add_master',
-                partNumber: document.getElementById('sw-part').value,
-                namaProduk: document.getElementById('sw-nama').value,
-                supplier: document.getElementById('sw-supp').value,
-                satuan: document.getElementById('sw-satuan').value,
-                lokasi: document.getElementById('sw-lokasi').value,
-                entryDate: new Date().toLocaleDateString('id-ID')
+                action: 'edit_master',
+                partNumber: document.getElementById('sw-edit-part').value,
+                namaProduk: document.getElementById('sw-edit-nama').value,
+                supplier: document.getElementById('sw-edit-supp').value,
+                kategori: document.getElementById('sw-edit-kat').value,
+                lokasi: document.getElementById('sw-edit-lokasi').value,
+                satuan: document.getElementById('sw-edit-satuan').value,
+                stokAwal: document.getElementById('sw-edit-stokawal').value,
+                pic: document.getElementById('sw-edit-pic').value
             }
         }
     }).then((result) => {
         if (result.isConfirmed) {
             Swal.showLoading();
-            // Memanggil fungsi di Kode.gs
+            // Memanggil fungsi Apps Script di file Kode.gs
             google.script.run
-                .withSuccessHandler(() => {
-                    Swal.fire('Berhasil', 'Data tersimpan ke Spreadsheet', 'success');
-                    // Refresh data
+                .withSuccessHandler((response) => {
+                    Swal.fire('Berhasil', 'Data Master berhasil diperbarui!', 'success');
+                    // Ambil ulang data Master_Data terbaru dari Spreadsheet agar view di web langsung ter-update
                     google.script.run.withSuccessHandler(renderManageMaster).getMasterData();
+                })
+                .withFailureHandler((err) => {
+                    Swal.fire('Gagal', 'Terjadi kesalahan: ' + err, 'error');
                 })
                 .processAction(result.value); 
         }
