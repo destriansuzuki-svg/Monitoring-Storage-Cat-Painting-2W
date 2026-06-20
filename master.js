@@ -196,20 +196,16 @@ function openModalEdit(item) {
         if (result.isConfirmed) {
             Swal.showLoading();
             
-            // Eksekusi pengiriman data dari GitHub ke REST API Apps Script pusat
             fetch(WEB_APP_URL, {
                 method: "POST",
-                mode: "no-cors", // Mengabaikan pemblokiran kebijakan CORS browser cross-origin
+                mode: "no-cors",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify(result.value)
             })
             .then(() => {
-                // Di mode 'no-cors', browser tidak diizinkan membaca isi response teks, namun transmisi dijamin masuk
                 Swal.fire('Berhasil', 'Sinkronisasi update data material sukses!', 'success');
-                
-                // Muat ulang data terbaru dari spreadsheet agar tabel ter-update seketika
                 setTimeout(() => {
                     loadMasterDataFromGitHub();
                 }, 1200);
@@ -220,3 +216,11 @@ function openModalEdit(item) {
         }
     });
 }
+
+// ==========================================
+// TRIGER UTAMA (BAGIAN YANG SEBELUMNYA HILANG)
+// ==========================================
+// Jalankan fungsi load data otomatis ketika file master.js dimuat di browser
+document.addEventListener("DOMContentLoaded", () => {
+    loadMasterDataFromGitHub();
+});
