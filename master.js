@@ -3,7 +3,7 @@
  */
 
 // LAKUKAN: Ganti string di bawah ini dengan URL Web App (berakhiran /exec) yang Anda dapatkan setelah Deploy Google Apps Script!
-const WEB_APP_URL = "PASANG_URL_WEB_APP_APPS_SCRIPT_ANDA_DI_SINI";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxbVY6lKaebSoF_FP4ip8Kd-Yt7fmFQSxFG1o5vHWH0dk7HqREwNiSokysj5qR1oW7E6Q/exec";
 
 // 1. FUNGSI UNTUK MEMUAT DATA AWAL DARI SPREADSHEET KE GITHUB
 function loadMasterDataFromGitHub() {
