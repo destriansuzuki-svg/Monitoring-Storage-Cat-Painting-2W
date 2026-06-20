@@ -81,14 +81,14 @@
                         </p>
                     </div>
                 </div>
-                <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-slate-800/50 text-slate-400 py-2 rounded text-[11px] hover:bg-red-600 hover:text-white transition-all font-bold border border-slate-700/50">
+                <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 bg-slate-800/50 text-slate-400 py-2 rounded text-[11px] hover:bg-red-600 hover:text-white transition-all font-bold border border-slate-700/50">
                     <i data-lucide="power" class="w-3.5 h-3.5"></i> Keluar Sistem
                 </button>
             </div>
         </aside>
 
-        <div id="mainContent" class="flex-1 md:ml-56 transition-all duration-300">
-            <main class="p-4 md:p-8 max-w-7xl mx-auto">
+        <div id="mainContent" class="flex-1 min-w-0 w-full md:ml-56 transition-all duration-300">
+            <main class="p-4 md:p-8 w-full">
                 
                 <header class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 border-b border-slate-200 pb-5">
                     <div class="flex items-center gap-3">
@@ -190,12 +190,12 @@
                     </div>
                 </section>
 
-                <section id="inventory-section" class="hidden animate-in fade-in">
-                    <div id="inventoryContainer" class="bg-white border border-slate-200 rounded shadow-sm overflow-x-auto min-h-[400px]"></div>
+                <section id="inventory-section" class="hidden w-full animate-in fade-in">
+                    <div id="inventoryContainer" class="w-full bg-white border border-slate-200 rounded shadow-sm overflow-x-auto min-h-[400px]"></div>
                 </section>
 
-                <section id="stock-section" class="hidden animate-in fade-in">
-                    <div id="stockSummaryContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                <section id="stock-section" class="hidden w-full animate-in fade-in">
+                    <div id="stockSummaryContainer" class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
                 </section>
 
                 <section id="master-section" class="hidden animate-in fade-in">
@@ -254,10 +254,7 @@
         // Toggle Sidebar Function (Desktop & Mobile Unified)
         function toggleSidebar() {
             if (window.innerWidth >= 768) {
-                // Atur visibilitas sidebar desktop
                 sidebar.classList.toggle('md:translate-x-0');
-                
-                // Atur pergeseran margin konten utama
                 if (sidebar.classList.contains('md:translate-x-0')) {
                     mainContent.classList.remove('md:ml-0');
                     mainContent.classList.add('md:ml-56');
@@ -266,9 +263,43 @@
                     mainContent.classList.add('md:ml-0');
                 }
             } else {
-                // Fallback toggle biasa untuk mobile view jika dipicu
                 sidebar.classList.toggle('-translate-x-full');
             }
+        }
+
+        // FIXED: Fungsi handleLogout Terintegrasi dengan SweetAlert & Session Clearing
+        function handleLogout() {
+            Swal.fire({
+                title: 'Keluar dari Sistem?',
+                text: "Anda harus login kembali untuk mengakses data gudang.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Keluar',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 1. Bersihkan semua tanda session di browser
+                    localStorage.removeItem('isLoggedIn');
+                    localStorage.removeItem('userRole');
+                    sessionStorage.clear();
+
+                    // 2. Tampilkan feedback sukses singkat
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil Keluar',
+                        text: 'Mengarahkan ke halaman utama...',
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then(() => {
+                        // 3. Alihkan paksa anchor hash kembali ke form login
+                        window.location.hash = '#login';
+                        // Jika form login Anda berada di file terpisah, ganti menjadi:
+                        // window.location.href = 'login.html';
+                    });
+                }
+            });
         }
 
         function showSection(id) {
@@ -296,7 +327,6 @@
             document.getElementById('sectionTitle').innerText = titles[id] || 'Warehouse';
             document.getElementById('breadcrumb').innerText = id.charAt(0).toUpperCase() + id.slice(1);
 
-            // Sembunyikan otomatis jika di mobile view setelah memilih menu
             if (window.innerWidth < 768) sidebar.classList.add('-translate-x-full');
             
             if(id === 'dashboard') processDashboardLogic();
@@ -341,7 +371,7 @@
                     </div>`;
             });
 
-            const today = new Date("2026-06-17"); // Menyesuaikan timeline sistem 2026
+            const today = new Date("2026-06-17");
             const expiredItems = master.filter(m => m.expiryDate && new Date(m.expiryDate) <= today);
             expiredItems.forEach(item => {
                 logsHtml += `
@@ -398,13 +428,9 @@
                 datasetsData = [45, 110, 25, 95, 0, 0, 0];
                 
                 backgroundColors = [
-                    'rgba(37, 99, 235, 0.4)', 
-                    'rgba(37, 99, 235, 0.4)', 
-                    'rgba(37, 99, 235, 0.4)', 
+                    'rgba(37, 99, 235, 0.4)', 'rgba(37, 99, 235, 0.4)', 'rgba(37, 99, 235, 0.4)', 
                     'rgba(249, 115, 22, 1)', 
-                    'rgba(226, 232, 240, 0.5)', 
-                    'rgba(226, 232, 240, 0.5)', 
-                    'rgba(226, 232, 240, 0.5)'
+                    'rgba(226, 232, 240, 0.5)', 'rgba(226, 232, 240, 0.5)', 'rgba(226, 232, 240, 0.5)'
                 ];
                 borderColors = [
                     'rgb(37, 99, 235)', 'rgb(37, 99, 235)', 'rgb(37, 99, 235)',
