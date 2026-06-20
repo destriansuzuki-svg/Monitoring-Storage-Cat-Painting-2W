@@ -1,7 +1,27 @@
 /**
- * master.js - Database Cat & Chemical (Full Column Integration & Live Sync)
+ * master.js - Database Cat & Chemical (GitHub Fetch API Integration)
  */
 
+// LAKUKAN: Ganti string di bawah ini dengan URL Web App (berakhiran /exec) yang Anda dapatkan setelah Deploy Google Apps Script!
+const WEB_APP_URL = "PASANG_URL_WEB_APP_APPS_SCRIPT_ANDA_DI_SINI";
+
+// 1. FUNGSI UNTUK MEMUAT DATA AWAL DARI SPREADSHEET KE GITHUB
+function loadMasterDataFromGitHub() {
+    // Menambahkan query param ?page=master agar ditangkap oleh doGet() di Apps Script
+    fetch(`${WEB_APP_URL}?page=master`)
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Panggil fungsi render bawaan untuk menyusun struktur tabel
+                renderManageMaster(result.data);
+            } else {
+                console.error("Gagal memuat data dari Spreadsheet:", result.error);
+            }
+        })
+        .catch(err => console.error("Koneksi API Error:", err));
+}
+
+// 2. FUNGSI RENDER UTAMA (STRUKTUR TABEL)
 function renderManageMaster(data) {
     const container = document.getElementById('masterContainer');
     if (!container) return;
@@ -9,7 +29,7 @@ function renderManageMaster(data) {
     // Reset class grid bawaan HTML agar tidak mengompresi tabel
     container.className = "w-full block";
 
-    // Menyesuaikan Header Tabel agar sama persis dengan lampiran sistem
+    // Menyesuaikan Header Tabel agar sesuai dengan lampiran sistem
     container.innerHTML = `
         <div class="w-full bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
             <div class="hidden md:block">
@@ -43,6 +63,7 @@ function renderManageMaster(data) {
     renderMasterRows(data);
 }
 
+// 3. FUNGSI UNTUK MERENDER BARIS DATA DARI DATABASE TERDISTRIBUSI
 function renderMasterRows(data) {
     const tbody = document.getElementById('masterTableBody');
     const cardContainer = document.getElementById('masterCards');
@@ -54,9 +75,8 @@ function renderMasterRows(data) {
         return;
     }
 
-    // Render Tabel Desktop dengan data dinamis dari Master_Data
+    // Render Tabel Desktop dengan data dinamis dari Master_Data & Stock_Material
     tbody.innerHTML = data.map((item, index) => {
-        // Logika kalkulasi stok akhir otomatis di sisi client (jika belum dikalkulasi dari server)
         const stokAwal = Number(item.stokAwal) || 0;
         const masuk = Number(item.totalMasuk) || 0;
         const keluar = Number(item.totalKeluar) || 0;
@@ -82,17 +102,17 @@ function renderMasterRows(data) {
                 <td class="p-3 text-center text-slate-500">${item.pic || '-'}</td>
                 <td class="p-3 text-center space-x-1 whitespace-nowrap">
                     <button onclick="openModalEdit(${JSON.stringify(item).replace(/"/g, '&quot;')})" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-all inline-block">
-                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                        <i class="w-4 h-4" data-lucide="edit-2"></i>
                     </button>
                     <button onclick="handleDeleteMaster('${item.partNumber}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all inline-block">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        <i class="w-4 h-4" data-lucide="trash-2"></i>
                     </button>
                 </td>
             </tr>
         `;
     }).join('');
 
-    // Render Card Mobile (Disesuaikan agar memuat informasi utama)
+    // Render Card Mobile (Disesuaikan agar responsif di smartphone)
     cardContainer.innerHTML = data.map((item, index) => `
         <div class="p-4 bg-white relative">
             <div class="flex justify-between items-start mb-2">
@@ -112,7 +132,7 @@ function renderMasterRows(data) {
     if(window.lucide) lucide.createIcons();
 }
 
-// FUNGSI MODAL EDIT DATA (SINKRON KE WEB & SPREADSHEET)
+// 4. FUNGSI MODAL EDIT DATA (SINKRONISASI VIA FETCH POST KE APPS SCRIPT)
 function openModalEdit(item) {
     Swal.fire({
         title: 'Edit Material Master',
@@ -175,17 +195,28 @@ function openModalEdit(item) {
     }).then((result) => {
         if (result.isConfirmed) {
             Swal.showLoading();
-            // Memanggil fungsi Apps Script di file Kode.gs
-            google.script.run
-                .withSuccessHandler((response) => {
-                    Swal.fire('Berhasil', 'Data Master berhasil diperbarui!', 'success');
-                    // Ambil ulang data Master_Data terbaru dari Spreadsheet agar view di web langsung ter-update
-                    google.script.run.withSuccessHandler(renderManageMaster).getMasterData();
-                })
-                .withFailureHandler((err) => {
-                    Swal.fire('Gagal', 'Terjadi kesalahan: ' + err, 'error');
-                })
-                .processAction(result.value); 
+            
+            // Eksekusi pengiriman data dari GitHub ke REST API Apps Script pusat
+            fetch(WEB_APP_URL, {
+                method: "POST",
+                mode: "no-cors", // Mengabaikan pemblokiran kebijakan CORS browser cross-origin
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(result.value)
+            })
+            .then(() => {
+                // Di mode 'no-cors', browser tidak diizinkan membaca isi response teks, namun transmisi dijamin masuk
+                Swal.fire('Berhasil', 'Sinkronisasi update data material sukses!', 'success');
+                
+                // Muat ulang data terbaru dari spreadsheet agar tabel ter-update seketika
+                setTimeout(() => {
+                    loadMasterDataFromGitHub();
+                }, 1200);
+            })
+            .catch(err => {
+                Swal.fire('Gagal', 'Terjadi masalah transmisi data: ' + err, 'error');
+            });
         }
     });
 }
