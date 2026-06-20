@@ -2,17 +2,21 @@
  * master.js - Database Cat & Chemical (GitHub Fetch API Integration)
  */
 
-// URL Web App Google Apps Script Anda
+// URL Web App Google Apps Script
 const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxbVY6lKaebSoF_FP4ip8Kd-Yt7fmFQSxFG1o5vHWH0dk7HqREwNiSokysj5qR1oW7E6Q/exec";
+
+// Wadah penyimpanan data global agar fungsi edit tidak perlu parsing JSON di dalam HTML atribut
+let globalMasterData = [];
 
 // 1. FUNGSI UNTUK MEMUAT DATA AWAL DARI SPREADSHEET KE GITHUB
 function loadMasterDataFromGitHub() {
-    console.log("Memulai penarikan data dari Apps Script...");
+    console.log("Memulai penarikan data master...");
     fetch(`${WEB_APP_URL}?page=master`)
         .then(response => response.json())
         .then(result => {
-            console.log("Hasil response dari server:", result);
-            if (result.success) {
+            console.log("Koneksi sukses, data diterima:", result);
+            if (result.success && result.data) {
+                globalMasterData = result.data; // Simpan ke dalam scope global
                 renderManageMaster(result.data);
             } else {
                 console.error("Gagal memuat data dari Spreadsheet:", result.error);
@@ -62,13 +66,13 @@ function renderManageMaster(data) {
     renderMasterRows(data);
 }
 
-// 3. FUNGSI UNTUK MERENDER BARIS DATA DARI DATABASE TERDISTRIBUSI
+// 3. FUNGSI UNTUK MERENDER BARIS DATA DARI DATABASE
 function renderMasterRows(data) {
     const tbody = document.getElementById('masterTableBody');
     const cardContainer = document.getElementById('masterCards');
     
     if (!data || data.length === 0) {
-        const empty = `<div class="p-10 text-center text-slate-400 italic">Data Master Kosong.</div>`;
+        const empty = `<div class="p-10 text-center text-slate-400 italic">Data Master Kosong atau Gagal Sinkronisasi.</div>`;
         if(tbody) tbody.innerHTML = `<tr><td colspan="13">${empty}</td></tr>`;
         if(cardContainer) cardContainer.innerHTML = empty;
         return;
@@ -81,6 +85,9 @@ function renderMasterRows(data) {
             const masuk = Number(item.totalMasuk) || 0;
             const keluar = Number(item.totalKeluar) || 0;
             const stokAkhir = stokAwal + masuk - keluar;
+            
+            // Penanganan toleransi properti case-insensitive dari Apps Script
+            const kategoriPilihan = item.kategori || item.KATEGORI || 'MATERIAL CAT';
 
             return `
                 <tr class="hover:bg-slate-50/80 transition-colors border-b border-slate-100">
@@ -89,7 +96,7 @@ function renderMasterRows(data) {
                     <td class="p-3 font-medium text-slate-800">${item.namaProduk || '-'}</td>
                     <td class="p-3 text-slate-500">${item.supplier || '-'}</td>
                     <td class="p-3 text-center">
-                        <span class="bg-blue-50 text-blue-600 font-medium px-2 py-0.5 rounded-full text-[10px]">${item.kategori || 'Material'}</span>
+                        <span class="bg-blue-50 text-blue-600 font-medium px-2 py-0.5 rounded-full text-[10px] uppercase">${kategoriPilihan}</span>
                     </td>
                     <td class="p-3 text-center">
                         <span class="bg-slate-100 text-slate-600 font-bold px-2 py-1 rounded text-[10px] uppercase">${item.lokasi || '-'}</span>
@@ -101,7 +108,7 @@ function renderMasterRows(data) {
                     <td class="p-3 text-center font-black text-blue-600 bg-blue-50/30">${stokAkhir}</td>
                     <td class="p-3 text-center text-slate-500">${item.pic || '-'}</td>
                     <td class="p-3 text-center space-x-1 whitespace-nowrap">
-                        <button onclick='openModalEdit(${JSON.stringify(item)})' class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-all inline-block">
+                        <button onclick="openModalEditByIndex(${index})" class="text-blue-500 hover:bg-blue-50 px-2 py-1 rounded border border-blue-200 transition-all text-[10px] font-medium inline-block">
                             Edit
                         </button>
                     </td>
@@ -110,37 +117,46 @@ function renderMasterRows(data) {
         }).join('');
     }
 
-    // Render Card Mobile
+    // Render Card Mobile (Untuk Tampilan Smartphone)
     if (cardContainer) {
-        cardContainer.innerHTML = data.map((item, index) => `
-            <div class="p-4 bg-white relative">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-blue-600 font-bold text-xs font-mono">${item.partNumber}</span>
-                    <span class="text-[9px] font-black text-slate-300">#${index + 1}</span>
+        cardContainer.innerHTML = data.map((item, index) => {
+            const stokAwal = Number(item.stokAwal) || 0;
+            const masuk = Number(item.totalMasuk) || 0;
+            const keluar = Number(item.totalKeluar) || 0;
+            const stokAkhir = stokAwal + masuk - keluar;
+            return `
+                <div class="p-4 bg-white relative">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-blue-600 font-bold text-xs font-mono">${item.partNumber}</span>
+                        <span class="text-[9px] font-black text-slate-300">#${index + 1}</span>
+                    </div>
+                    <p class="font-bold text-slate-800 text-xs mb-1">${item.namaProduk}</p>
+                    <p class="text-[10px] text-slate-400 mb-2">Supplier: ${item.supplier || '-'}</p>
+                    <div class="grid grid-cols-3 gap-2 text-[10px] border-t pt-2 bg-slate-50 p-2 rounded">
+                        <div><span class="text-slate-400 font-bold uppercase block text-[8px]">Lokasi</span> ${item.lokasi || '-'}</div>
+                        <div><span class="text-slate-400 font-bold uppercase block text-[8px]">Satuan</span> ${item.satuan} L</div>
+                        <div class="text-right"><span class="text-blue-500 font-bold uppercase block text-[8px]">Stok Akhir</span> ${stokAkhir}</div>
+                    </div>
                 </div>
-                <p class="font-bold text-slate-800 text-xs mb-1">${item.namaProduk}</p>
-                <p class="text-[10px] text-slate-400 mb-2">Supplier: ${item.supplier || '-'}</p>
-                <div class="grid grid-cols-3 gap-2 text-[10px] border-t pt-2 bg-slate-50 p-2 rounded">
-                    <div><span class="text-slate-400 font-bold uppercase block text-[8px]">Lokasi</span> ${item.lokasi || '-'}</div>
-                    <div><span class="text-slate-400 font-bold uppercase block text-[8px]">Satuan</span> ${item.satuan} L</div>
-                    <div class="text-right"><span class="text-blue-500 font-bold uppercase block text-[8px]">Stok Akhir</span> ${ (Number(item.stokAwal)||0) + (Number(item.totalMasuk)||0) - (Number(item.totalKeluar)||0) }</div>
-                </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
-    // PENANGANAN AMAN UNTUK LUCIDE ICONS (Agar tidak crash jika library belum termuat)
+    // Amankan pemanggilan Lucide Icon agar tidak membuat aplikasi crash jika library terlambat dimuat
     try {
-        if (typeof lucide !== 'undefined') {
+        if (window.lucide && typeof lucide.createIcons === 'function') {
             lucide.createIcons();
         }
     } catch (e) {
-        console.warn("Ikon Lucide gagal dimuat, menggunakan teks biasa fallback.", e);
+        console.warn("Sistem merender tabel tanpa ikon Lucide.", e);
     }
 }
 
-// 4. FUNGSI MODAL EDIT DATA
-function openModalEdit(item) {
+// 4. FUNGSI AMAN MODAL EDIT BERDASARKAN INDEKS ARRAY GLOBAL
+function openModalEditByIndex(index) {
+    const item = globalMasterData[index];
+    if (!item) return;
+
     Swal.fire({
         title: 'Edit Material Master',
         html: `
@@ -160,7 +176,7 @@ function openModalEdit(item) {
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="font-bold text-slate-500 block mb-1">KATEGORI</label>
-                        <input id="sw-edit-kat" class="w-full border p-2 rounded" value="${item.kategori || 'Material'}">
+                        <input id="sw-edit-kat" class="w-full border p-2 rounded" value="${item.kategori || item.KATEGORI || 'MATERIAL CAT'}">
                     </div>
                     <div>
                         <label class="font-bold text-slate-500 block mb-1">LOKASI</label>
@@ -217,7 +233,7 @@ function openModalEdit(item) {
     });
 }
 
-// TRIGGER OTOMATIS SAAT HALAMAN DIBUKA
+// TRIGGER OTOMATIS SAAT CONTAINER SIAP
 document.addEventListener("DOMContentLoaded", () => {
     loadMasterDataFromGitHub();
 });
