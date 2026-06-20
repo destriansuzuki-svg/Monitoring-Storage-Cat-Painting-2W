@@ -4,7 +4,7 @@
  */
 
 // URL Web App Google Apps Script
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyO8WveXo8Q0MTf-p3eQeEjuP7UiJBZ5H0N8LZd3Neb_h7RNQ-pCXbQfMDv_dx7tCwFKA/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxY-Z_XzQAD0ufflQWC1r3HpBvwc7UN_woUwPl2UWnffpKS9Fjp_RonP253aoJ3_H3sRA/exec";
 
 // Wadah penyimpanan data global agar fungsi edit tidak perlu parsing JSON di dalam HTML atribut
 let globalMasterData = [];
