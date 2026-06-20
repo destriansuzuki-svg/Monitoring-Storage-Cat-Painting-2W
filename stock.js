@@ -39,7 +39,7 @@ function renderStockSummary(data) {
                         <option value="03">Maret</option><option value="04">April</option>
                         <option value="05">Mei</option><option value="06">Juni</option>
                         <option value="07">Juli</option><option value="08">Agustus</option>
-                        <option value="09">September</option><option value="10">Oktobe</option>
+                        <option value="09">September</option><option value="10">Oktober</option>
                         <option value="11">November</option><option value="12">Desember</option>
                     </select>
                 </div>
@@ -65,26 +65,26 @@ function renderStockSummary(data) {
 
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="hidden lg:block overflow-x-auto">
-                <table class="w-full text-left border-collapse" style="min-width: 1300px;">
+                <table class="w-full text-left border-collapse table-fixed" style="min-width: 1100px;">
                     <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] border-b border-slate-200/80">
                         <tr>
-                            <th class="p-3 text-center text-slate-700 font-bold" style="width: 50px;">NO</th>
-                            <th class="p-3" style="width: 140px;">PART NUMBER</th>
-                            <th class="p-3" style="width: 200px;">NAMA PRODUK</th>
-                            <th class="p-3" style="width: 140px;">SUPPLIER</th>
-                            <th class="p-3" style="width: 110px;">KATEGORI</th>
-                            <th class="p-3 text-center" style="width: 100px;">LOKASI</th>
-                            <th class="p-3 text-center" style="width: 100px;">SATUAN (L)</th>
-                            <th class="p-3 text-center" style="width: 100px;">STOCK AWAL</th>
-                            <th class="p-3 text-center text-emerald-600" style="width: 120px;">TOTAL MASUK (L)</th>
-                            <th class="p-3 text-center text-red-500" style="width: 120px;">TOTAL KELUAR (L)</th>
-                            <th class="p-3 text-center text-blue-600 font-black bg-slate-50/50" style="width: 120px;">STOCK AKHIR</th>
-                            <th class="p-3" style="width: 100px;">PIC</th>
-                            <th class="p-3 text-center" style="width: 90px;">AKSI</th>
+                            <th class="px-2 py-3 text-center text-slate-700 font-bold" style="width: 40px;">NO</th>
+                            <th class="px-2 py-3" style="width: 120px;">PART NUMBER</th>
+                            <th class="px-2 py-3" style="width: 160px;">NAMA PRODUK</th>
+                            <th class="px-2 py-3" style="width: 110px;">SUPPLIER</th>
+                            <th class="px-2 py-3" style="width: 90px;">KATEGORI</th>
+                            <th class="px-2 py-3 text-center" style="width: 70px;">LOKASI</th>
+                            <th class="px-2 py-3 text-center" style="width: 80px;">SATUAN</th>
+                            <th class="px-2 py-3 text-center" style="width: 80px;">STOK AWAL</th>
+                            <th class="px-2 py-3 text-center text-emerald-600" style="width: 95px;">MASUK (L)</th>
+                            <th class="px-2 py-3 text-center text-red-500" style="width: 95px;">KELUAR (L)</th>
+                            <th class="px-2 py-3 text-center text-blue-600 font-black bg-slate-50/50" style="width: 95px;">STOK AKHIR</th>
+                            <th class="px-2 py-3" style="width: 90px;">PIC</th>
+                            <th class="px-2 py-3 text-center" style="width: 75px;">AKSI</th>
                         </tr>
                     </thead>
                     <tbody id="stockTableBody" class="text-slate-600 divide-y divide-slate-100 bg-white text-[11px]">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
 
@@ -119,27 +119,27 @@ function displayStockRows(items) {
         const keluar = parseFloat(item.totalKeluar) || 0;
         const akhir = awal + masuk - keluar;
 
-        // Render baris versi Desktop (Urutan Kolom Sesuai File Gambar Anda)
+        // Render baris versi Desktop dengan optimasi ruang padding
         tableHtml += `
             <tr class="hover:bg-slate-50/70 transition-all">
-                <td class="p-3 text-center font-bold text-slate-400 bg-slate-50/30">${index + 1}</td>
-                <td class="p-3 font-bold text-slate-900 font-mono">${item.partNumber || '-'}</td>
-                <td class="p-3 font-medium text-slate-800">${item.namaProduk || '-'}</td>
-                <td class="p-3 text-slate-500">${item.supplier || '-'}</td>
-                <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700">${item.kategori || 'Material'}</span></td>
-                <td class="p-3 text-center font-bold text-slate-500 uppercase">${item.lokasi || '-'}</td>
-                <td class="p-3 text-center font-semibold">${item.satuan || '0'} L</td>
-                <td class="p-3 text-center font-medium">${awal}</td>
-                <td class="p-3 text-center text-emerald-600 font-semibold bg-emerald-50/20">+${masuk}</td>
-                <td class="p-3 text-center text-red-500 font-semibold bg-red-50/20">-${keluar}</td>
-                <td class="p-3 text-center font-black text-slate-900 bg-slate-100/60">${akhir}</td>
-                <td class="p-3 text-slate-600 font-medium">${item.pic || '-'}</td>
-                <td class="p-3 text-center">
-                    <div class="flex items-center justify-center gap-1">
-                        <button onclick="openModalEditStock(${index})" class="text-blue-500 hover:bg-blue-50 p-1.5 rounded-lg transition-all" title="Edit Data">
+                <td class="px-2 py-2.5 text-center font-bold text-slate-400 bg-slate-50/30">${index + 1}</td>
+                <td class="px-2 py-2.5 font-bold text-slate-900 font-mono truncate" title="${item.partNumber || '-'}">${item.partNumber || '-'}</td>
+                <td class="px-2 py-2.5 font-medium text-slate-800 truncate" title="${item.namaProduk || '-'}">${item.namaProduk || '-'}</td>
+                <td class="px-2 py-2.5 text-slate-500 truncate" title="${item.supplier || '-'}">${item.supplier || '-'}</td>
+                <td class="px-2 py-2.5"><span class="px-1.5 py-0.5 rounded text-[9px] font-medium bg-blue-50 text-blue-700 block text-center truncate">${item.kategori || 'Material'}</span></td>
+                <td class="px-2 py-2.5 text-center font-bold text-slate-500 uppercase truncate">${item.lokasi || '-'}</td>
+                <td class="px-2 py-2.5 text-center font-semibold">${item.satuan || '0'} L</td>
+                <td class="px-2 py-2.5 text-center font-medium">${awal}</td>
+                <td class="px-2 py-2.5 text-center text-emerald-600 font-semibold bg-emerald-50/10">+${masuk}</td>
+                <td class="px-2 py-2.5 text-center text-red-500 font-semibold bg-red-50/10">-${keluar}</td>
+                <td class="px-2 py-2.5 text-center font-black text-slate-900 bg-slate-100/40">${akhir}</td>
+                <td class="px-2 py-2.5 text-slate-600 font-medium truncate" title="${item.pic || '-'}">${item.pic || '-'}</td>
+                <td class="px-2 py-2.5 text-center">
+                    <div class="flex items-center justify-center gap-0.5">
+                        <button onclick="openModalEditStock(${index})" class="text-blue-500 hover:bg-blue-50 p-1 rounded-lg transition-all" title="Edit Data">
                             <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
                         </button>
-                        <button onclick="handleDeleteStock('${item.partNumber}')" class="text-red-500 hover:bg-red-50 p-1.5 rounded-lg transition-all" title="Hapus Data">
+                        <button onclick="handleDeleteStock('${item.partNumber}')" class="text-red-500 hover:bg-red-50 p-1 rounded-lg transition-all" title="Hapus Data">
                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
@@ -178,7 +178,7 @@ function displayStockRows(items) {
     if (window.lucide) lucide.createIcons();
 }
 
-// 3. LOGIKA ENGINE: Live Client-Side Filtering (Search, Tanggal, Bulan, Tahun)
+// 3. LOGIKA ENGINE: Live Client-Side Filtering
 function filterStockRows() {
     const query = document.getElementById('searchStock').value.toLowerCase();
     const tgl = document.getElementById('filterTanggal').value;
@@ -186,25 +186,23 @@ function filterStockRows() {
     const thn = document.getElementById('filterTahun').value;
 
     const filtered = window.rawStockData.filter(item => {
-        // Cek kecocokan teks pencarian
         const matchSearch = (item.partNumber || '').toLowerCase().includes(query) || 
                             (item.namaProduk || '').toLowerCase().includes(query);
 
-        // Parsing tanggal entry/transaksi dari database (asumsi format 'YYYY-MM-DD' atau 'DD/MM/YYYY')
         let matchDate = true;
         if (item.entryDate) {
-            const cleanDate = item.entryDate.replace(/\//g, '-'); // Normalisasi separator
+            const cleanDate = item.entryDate.replace(/\//g, '-'); 
             const parts = cleanDate.split('-'); 
             
             let d = '', m = '', y = '';
-            if (parts[0].length === 4) { [y, m, d] = parts; } // YYYY-MM-DD
-            else { [d, m, y] = parts; } // DD-MM-YYYY
+            if (parts[0].length === 4) { [y, m, d] = parts; } 
+            else { [d, m, y] = parts; } 
 
             if (tgl && d !== tgl) matchDate = false;
             if (bln && m !== bln) matchDate = false;
             if (thn && y !== thn) matchDate = false;
         } else if (tgl || bln || thn) {
-            matchDate = false; // Jika filter aktif tapi data tidak punya tanggal
+            matchDate = false; 
         }
 
         return matchSearch && matchDate;
@@ -213,7 +211,7 @@ function filterStockRows() {
     displayStockRows(filtered);
 }
 
-// 4. AKSES GOOGLE APPS SCRIPT: Tambah Item Baru ke Sheet 'Stock_Material'
+// 4. AKSES GOOGLE APPS SCRIPT: Tambah Item Baru
 function openModalAddStock() {
     Swal.fire({
         title: 'Tambah Material Gudang',
@@ -252,8 +250,10 @@ function openModalAddStock() {
                 lokasi: document.getElementById('st-lokasi').value.trim(),
                 satuan: document.getElementById('st-satuan').value,
                 stockAwal: document.getElementById('st-awal').value || 0,
+                totalMasuk: 0,
+                totalKeluar: 0,
                 pic: document.getElementById('st-pic').value.trim(),
-                entryDate: new Date().toISOString().split('T')[0] // Format YYYY-MM-DD standard database
+                entryDate: new Date().toISOString().split('T')[0]
             }
         }
     }).then((result) => {
@@ -266,7 +266,6 @@ function openModalAddStock() {
             google.script.run
                 .withSuccessHandler(() => {
                     Swal.fire('Sinkronisasi Sukses', 'Item material berhasil ditambahkan ke Spreadsheet.', 'success');
-                    // Ambil ulang data terbaru untuk refresh screen
                     google.script.run.withSuccessHandler(renderStockSummary).getStockData();
                 })
                 .processAction(result.value); 
@@ -337,7 +336,7 @@ function openModalEditStock(index) {
     });
 }
 
-// 6. AKSES GOOGLE APPS SCRIPT: Hapus Item dari Baris Cloud
+// 6. AKSES GOOGLE APPS SCRIPT: Hapus Item
 function handleDeleteStock(partNumber) {
     Swal.fire({
         title: 'Hapus Material?',
@@ -364,7 +363,7 @@ function handleDeleteStock(partNumber) {
     });
 }
 
-// 7. UTILITY: Engine Export To format Excel Standard Tanpa Library Pihak Ketiga
+// 7. UTILITY: Engine Export To CSV
 function exportStockToExcel() {
     if(window.rawStockData.length === 0) {
         Swal.fire('Perhatian', 'Tidak ada baris data material untuk di-export.', 'info');
@@ -372,7 +371,6 @@ function exportStockToExcel() {
     }
 
     let csvContent = "data:text/csv;charset=utf-8,";
-    // Header Kolom Sesuai Standard Urutan
     csvContent += "NO,PART NUMBER,NAMA PRODUK,SUPPLIER,KATEGORI,LOKASI,SATUAN (L),STOCK AWAL,TOTAL MASUK,TOTAL KELUAR,STOCK AKHIR,PIC\n";
 
     window.rawStockData.forEach((item, index) => {
